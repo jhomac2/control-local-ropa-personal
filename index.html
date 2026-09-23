@@ -1,0 +1,3752 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50 text-slate-800">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sistema de Gestión — Local de Ropa & Finanzas Personales</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              store: '#7c3aed',
+              storeDark: '#6d28d9',
+              personal: '#2563eb',
+              personalDark: '#1d4ed8',
+              profit: '#059669',
+              reinvest: '#d97706'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- SheetJS (XLSX / CSV parser) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Adaptación de Modo Oscuro */
+    html.dark body {
+      background-color: #020617 !important;
+      color: #f8fafc !important;
+    }
+    html.dark .bg-white {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+    }
+    html.dark .bg-slate-50 {
+      background-color: #1e293b !important;
+      color: #f1f5f9 !important;
+    }
+    html.dark .bg-slate-100 {
+      background-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    html.dark .border-slate-200, 
+    html.dark .border-slate-100, 
+    html.dark .border-slate-300 {
+      border-color: #334155 !important;
+    }
+    html.dark .text-slate-800, 
+    html.dark .text-slate-900, 
+    html.dark .text-slate-700 {
+      color: #f8fafc !important;
+    }
+    html.dark .text-slate-600, 
+    html.dark .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    html.dark input, 
+    html.dark select, 
+    html.dark textarea {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+      border-color: #475569 !important;
+    }
+    html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+    html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+      border-color: #334155 !important;
+    }
+
+    /* Formato RIDE SRI Factura */
+    #printableInvoiceArea {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+    }
+    #printableInvoiceArea .bg-slate-50 {
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+    }
+    #printableInvoiceArea .border-slate-200,
+    #printableInvoiceArea .border-slate-300 {
+      border-color: #cbd5e1 !important;
+    }
+    #printableInvoiceArea .text-slate-900,
+    #printableInvoiceArea .text-slate-800 {
+      color: #0f172a !important;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #printableInvoiceArea, #printableInvoiceArea * {
+        visibility: visible !important;
+      }
+      #printableInvoiceArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 15px;
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col antialiased selection:bg-purple-600 selection:text-white pb-24 md:pb-0">
+
+  <!-- Toast de Notificaciones -->
+  <div id="toastNotification" class="fixed top-4 right-4 z-50 transform transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
+    <div class="bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-bold">
+      <span id="toastIcon" class="text-base">✅</span>
+      <span id="toastMessage">Acción completada con éxito</span>
+    </div>
+  </div>
+
+  <!-- Encabezado Superior -->
+  <header class="no-print bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
+      
+      <!-- Logo y Nombres de Empresa y Usuario -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex-shrink-0 flex items-center justify-center font-black text-white text-base sm:text-lg shadow-sm">
+          🛍️
+        </div>
+        <div class="truncate">
+          <div class="flex items-center gap-1.5 truncate">
+            <h1 class="font-extrabold text-xs sm:text-base tracking-tight text-white flex items-center gap-1 truncate">
+              <span id="headerStoreName" class="truncate">BOUTIQUE JHORDY</span>
+              <span class="text-slate-500 font-normal text-[11px]">|</span>
+              <span id="headerOwnerName" class="text-[11px] sm:text-xs text-purple-300 font-semibold truncate">Jhordy</span>
+            </h1>
+          </div>
+          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block">Control de Stock, Ventas, Ganancias y Finanzas Personales</p>
+        </div>
+      </div>
+
+      <!-- Balances en Vivo y Accesos Rápidos -->
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <!-- Selector Global de Año -->
+        <div class="flex items-center bg-slate-800/90 border border-slate-700 rounded-xl px-2 py-1 text-[11px] sm:text-xs">
+          <select id="globalYearSelect" onchange="changeGlobalYear(this.value)" class="bg-transparent text-white font-bold outline-none cursor-pointer">
+            <option value="2026" class="bg-slate-800">2026</option>
+            <option value="2025" class="bg-slate-800">2025</option>
+            <option value="2024" class="bg-slate-800">2024</option>
+          </select>
+        </div>
+
+        <!-- Badge Saldo Personal -->
+        <div class="flex items-center gap-1.5 bg-blue-950/80 border border-blue-500/30 px-2 sm:px-3 py-1 rounded-xl text-xs cursor-pointer hover:bg-blue-900/60 transition" onclick="switchMainTab('tabPersonal')" title="Ver Finanzas Personales">
+          <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
+          <div>
+            <span class="text-[8px] sm:text-[9px] text-blue-300 font-semibold block leading-tight hidden xs:inline">Personal</span>
+            <span id="badgePersonalBalance" class="font-mono font-bold text-white text-[11px] sm:text-sm">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Badge Saldo Local de Ropa -->
+        <div class="flex items-center gap-1.5 bg-purple-950/80 border border-purple-500/30 px-2 sm:px-3 py-1 rounded-xl text-xs cursor-pointer hover:bg-purple-900/60 transition" onclick="switchMainTab('tabStore')" title="Ver Negocio de Ropa">
+          <div class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></div>
+          <div>
+            <span id="badgeStoreLabel" class="text-[8px] sm:text-[9px] text-purple-300 font-semibold block leading-tight hidden xs:inline">Local Ropa</span>
+            <span id="badgeStoreBalance" class="font-mono font-bold text-white text-[11px] sm:text-sm">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Botón Rápido de Transferencia -->
+        <button onclick="openModalTransfer()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs shadow transition active:scale-95 flex items-center gap-1" title="Transferir dinero entre Local y Personal">
+          <i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline text-xs">Transferir</span>
+        </button>
+
+        <!-- Botón Modo Claro / Oscuro -->
+        <button onclick="toggleTheme()" id="btnToggleTheme" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition active:scale-95" title="Modo Claro / Oscuro">
+          <i data-lucide="sun" id="iconThemeSun" class="w-3.5 h-3.5 hidden"></i>
+          <i data-lucide="moon" id="iconThemeMoon" class="w-3.5 h-3.5"></i>
+        </button>
+
+        <!-- Botón Guía -->
+        <button onclick="openModalHelpTour()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700" title="Guía y Ayuda">
+          <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
+        </button>
+
+        <!-- Botón Ajustes -->
+        <button onclick="openModalSettings()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 p-1.5 rounded-xl transition" title="Configuración, Empresa y Respaldos">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Navegación de Pestañas para Escritorio -->
+    <nav class="hidden md:block bg-slate-950 border-t border-slate-800 px-3 sm:px-6">
+      <div class="max-w-7xl mx-auto flex items-center gap-1 overflow-x-auto py-1 text-xs">
+        <button onclick="switchMainTab('tabHome')" id="navTabHome" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-white bg-slate-800 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+          <span>Dashboard & Ganancias</span>
+        </button>
+
+        <button onclick="switchMainTab('tabInventory')" id="navTabInventory" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="package" class="w-3.5 h-3.5 text-purple-400"></i>
+          <span>Inventario de Mercadería</span>
+        </button>
+
+        <button onclick="switchMainTab('tabPos')" id="navTabPos" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Punto de Venta (Venta Rápida)</span>
+        </button>
+
+        <button onclick="switchMainTab('tabStore')" id="navTabStore" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="store" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Contabilidad Local Ropa</span>
+        </button>
+
+        <button onclick="switchMainTab('tabPersonal')" id="navTabPersonal" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="wallet" class="w-3.5 h-3.5 text-blue-400"></i>
+          <span>Finanzas Personales</span>
+        </button>
+
+        <button onclick="switchMainTab('tabDebts')" id="navTabDebts" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="credit-card" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>Control de Deudas</span>
+        </button>
+
+        <button onclick="switchMainTab('tabCategories')" id="navTabCategories" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="tags" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Categorías</span>
+        </button>
+
+        <button onclick="switchMainTab('tabTransfers')" id="navTabTransfers" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="repeat" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Transferencias</span>
+        </button>
+
+        <button onclick="switchMainTab('tabInvoiceView')" id="navTabInvoiceView" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
+          <i data-lucide="file-check" class="w-3.5 h-3.5 text-blue-400"></i>
+          <span>Factura SRI Ecuador</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
+
+    <!-- ============================================================== -->
+    <!-- TAB 1: INICIO & DASHBOARD (GANANCIA, CAPITAL RECUPERADO, REINVERSIÓN) -->
+    <!-- ============================================================== -->
+    <section id="tabHome" class="tab-content space-y-6">
+      
+      <!-- Banner de Bienvenida -->
+      <div id="tourTargetWelcome" class="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white rounded-3xl p-5 sm:p-7 shadow-xl border border-slate-700/60 relative overflow-hidden">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+              <span>●</span> Sistema Central de Gestión Comercial & Personal
+            </span>
+            <h2 class="text-xl sm:text-2xl font-black text-white mt-1">
+              Bienvenido, <span id="homeWelcomeOwner" class="text-purple-300">Jhordy</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+              Control transparente de <b>Ganancia Neta</b>, <b>Capital Recuperado</b> y <b>Fondos para Reinversión en Mercadería</b> con separación contable estricta.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openModalBatchSale()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 transition active:scale-95">
+              <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+              <span>+ Añadir Venta</span>
+            </button>
+            <button onclick="openModalBatchRestock()" class="bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 transition active:scale-95">
+              <i data-lucide="truck" class="w-4 h-4"></i>
+              <span>+ Ingresar Mercadería</span>
+            </button>
+            <button onclick="openModalUniversalIncome()" class="bg-teal-600 hover:bg-teal-500 text-white px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 transition active:scale-95">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>+ Registrar Ingreso</span>
+            </button>
+            <button onclick="openModalUniversalExpense()" class="bg-rose-600 hover:bg-rose-500 text-white px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow-md flex items-center gap-1.5 transition active:scale-95">
+              <i data-lucide="minus-circle" class="w-4 h-4"></i>
+              <span>- Registrar Gasto</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALERTA DE STOCK CRÍTICO O EN 0 -->
+      <div id="stockCriticalAlertContainer" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 text-amber-500 mt-0.5"></i>
+        <div class="flex-1 text-xs">
+          <span class="font-black text-sm block">¡Atención! Hay prendas sin stock disponible o críticas:</span>
+          <div id="stockCriticalList" class="mt-1 flex flex-wrap gap-1.5 font-bold"></div>
+        </div>
+      </div>
+
+      <!-- TARJETAS PRINCIPALES DEL NEGOCIO (KPIS CLAVE) -->
+      <div id="tourTargetKPIs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- 1. GANANCIA TOTAL -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600">Ganancia Neta Real</span>
+            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
+              💵
+            </div>
+          </div>
+          <span id="kpiNetProfit" class="font-mono text-2xl sm:text-3xl font-black text-emerald-600 block mt-2">$0.00</span>
+          <p class="text-[11px] text-slate-500 mt-1">Ventas Cobradas − Costo Prendas − Gastos Local</p>
+        </div>
+
+        <!-- 2. CAPITAL RECUPERADO -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase tracking-wider text-blue-600">Capital Recuperado</span>
+            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+              🔄
+            </div>
+          </div>
+          <span id="kpiRecoveredCapital" class="font-mono text-2xl sm:text-3xl font-black text-blue-600 block mt-2">$0.00</span>
+          <p class="text-[11px] text-slate-500 mt-1">Costo de mercadería vendida devuelta a caja</p>
+        </div>
+
+        <!-- 3. CUÁNTO PUEDO VOLVER A INVERTIR -->
+        <div class="bg-gradient-to-br from-purple-900 to-indigo-950 text-white rounded-3xl p-5 border border-purple-700/50 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase tracking-wider text-amber-300">Disponible para Reinvertir</span>
+            <div class="w-8 h-8 rounded-xl bg-purple-800 text-amber-300 flex items-center justify-center font-bold text-sm">
+              📦
+            </div>
+          </div>
+          <span id="kpiReinvestmentFunds" class="font-mono text-2xl sm:text-3xl font-black text-amber-300 block mt-2">$0.00</span>
+          <p class="text-[11px] text-purple-200 mt-1">Ganancias netas acumuladas + Capital recuperado</p>
+        </div>
+
+        <!-- 4. VALOR DEL STOCK ACTUAL EN BODEGA / TIENDA -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Valor Inventario Actual</span>
+            <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-sm">
+              🏷️
+            </div>
+          </div>
+          <span id="kpiInventoryValuation" class="font-mono text-2xl sm:text-3xl font-black text-slate-900 block mt-2">$0.00</span>
+          <p class="text-[11px] text-slate-500 mt-1"><span id="kpiTotalItemsCount">0</span> prendas en stock valoradas a costo</p>
+        </div>
+
+      </div>
+
+      <!-- Gráficos de Ventas y Rendimiento Financiero -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-600"></i>
+              <span>Ventas Mensuales: Costo (Capital) vs Ganancia Neta</span>
+            </h4>
+          </div>
+          <div class="h-64">
+            <canvas id="chartSalesBreakdown"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-600"></i>
+              <span>Ventas por Categoría de Ropa</span>
+            </h4>
+          </div>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="chartCategorySales"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Resumen Dual: Local de Ropa vs Finanzas Personales -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Tarjeta Resumen Local de Ropa -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-base">
+                🏬
+              </div>
+              <div>
+                <h4 class="font-black text-sm text-slate-900" id="dashStoreTitle">Local de Ropa</h4>
+                <span class="text-xs text-slate-400">Ventas, compras, arriendo y flujo de tienda</span>
+              </div>
+            </div>
+            <button onclick="switchMainTab('tabStore')" class="text-xs font-bold text-purple-600 hover:text-purple-700 bg-purple-50 px-3 py-1.5 rounded-xl">
+              Ver Contabilidad ➔
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center pt-2 border-t border-slate-100">
+            <div class="p-2.5 bg-slate-50 rounded-2xl">
+              <span class="text-[9px] uppercase font-bold text-slate-400 block">Ventas Año</span>
+              <span id="dashStoreIncome" class="font-mono text-sm font-black text-emerald-600">$0.00</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-2xl">
+              <span class="text-[9px] uppercase font-bold text-slate-400 block">Gastos Local</span>
+              <span id="dashStoreExpense" class="font-mono text-sm font-black text-rose-600">$0.00</span>
+            </div>
+            <div class="p-2.5 bg-purple-50 rounded-2xl">
+              <span class="text-[9px] uppercase font-bold text-purple-700 block">Caja del Local</span>
+              <span id="dashStoreBalance" class="font-mono text-sm font-black text-purple-700">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Resumen Finanzas Personales -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-base">
+                💳
+              </div>
+              <div>
+                <h4 class="font-black text-sm text-slate-900">Finanzas Personales</h4>
+                <span class="text-xs text-slate-400">Ahorros propios, gastos familiares y deudas</span>
+              </div>
+            </div>
+            <button onclick="switchMainTab('tabPersonal')" class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl">
+              Ver Finanzas ➔
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center pt-2 border-t border-slate-100">
+            <div class="p-2.5 bg-slate-50 rounded-2xl">
+              <span class="text-[9px] uppercase font-bold text-slate-400 block">Ingresos Año</span>
+              <span id="dashPersonalIncome" class="font-mono text-sm font-black text-emerald-600">$0.00</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-2xl">
+              <span class="text-[9px] uppercase font-bold text-slate-400 block">Gastos Propios</span>
+              <span id="dashPersonalExpense" class="font-mono text-sm font-black text-rose-600">$0.00</span>
+            </div>
+            <div class="p-2.5 bg-blue-50 rounded-2xl">
+              <span class="text-[9px] uppercase font-bold text-blue-700 block">Deuda Pendiente</span>
+              <span id="dashPersonalDebt" class="font-mono text-sm font-black text-blue-700">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Últimas Transacciones Registradas -->
+      <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="font-extrabold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <i data-lucide="history" class="w-4 h-4 text-slate-400"></i>
+            <span>Últimos Movimientos Registrados (Cuentas Separadas)</span>
+          </h4>
+          <span class="text-[11px] text-slate-400">Auditoría en tiempo real</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 uppercase text-[10px] font-bold">
+                <th class="py-2 px-2">Fecha</th>
+                <th class="py-2 px-2">Cuenta</th>
+                <th class="py-2 px-2">Tipo</th>
+                <th class="py-2 px-2">Categoría</th>
+                <th class="py-2 px-2">Detalle</th>
+                <th class="py-2 px-2 text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody id="homeRecentTransactionsBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: INVENTARIO DE MERCADERÍA (MANUAL & EXCEL)               -->
+    <!-- ============================================================== -->
+    <section id="tabInventory" class="tab-content hidden space-y-6">
+
+      <!-- Encabezado de Inventario -->
+      <div class="bg-slate-900 text-white p-5 rounded-3xl shadow-lg border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-purple-400">Gestión de Stock & Prendas</span>
+          <h2 class="text-xl sm:text-2xl font-black">Inventario de Mercadería</h2>
+          <p class="text-xs text-slate-300 mt-0.5">Control de stock, alertas de prendas agotadas e ingreso masivo de compras.</p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="openModalNewProduct()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold px-3 py-2 rounded-2xl text-xs border border-purple-500/30 transition flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Prenda Manual</span>
+          </button>
+          <button onclick="openModalBatchRestock()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3.5 py-2 rounded-2xl text-xs shadow transition active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="truck" class="w-3.5 h-3.5"></i>
+            <span>+ Ingresar Mercadería</span>
+          </button>
+          <button onclick="downloadExcelTemplate()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-1.5" title="Descargar formato base para llenar">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Plantilla Excel</span>
+          </button>
+          <button onclick="openModalImportExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-2xl text-xs shadow transition active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+            <span>Importar Excel</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros de Búsqueda y Categorías -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="relative flex-1 max-w-md">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          <input type="text" id="inventorySearchInput" oninput="renderInventoryTable()" placeholder="Buscar por código o nombre de prenda..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 outline-none focus:border-purple-500">
+        </div>
+
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-slate-600">Categoría:</label>
+          <select id="inventoryCategoryFilter" onchange="renderInventoryTable()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold bg-slate-50 text-slate-800 outline-none">
+            <option value="all">Todas las Categorías</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tabla de Mercadería -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 uppercase text-[10px] font-black border-y border-slate-200">
+                <th class="py-2.5 px-3">Código</th>
+                <th class="py-2.5 px-3">Prenda / Descripción</th>
+                <th class="py-2.5 px-3">Categoría</th>
+                <th class="py-2.5 px-3">Talla / Color</th>
+                <th class="py-2.5 px-3 text-right">Stock</th>
+                <th class="py-2.5 px-3 text-right">Costo ($)</th>
+                <th class="py-2.5 px-3 text-right">PVP Venta ($)</th>
+                <th class="py-2.5 px-3 text-right">Ganancia Est. ($)</th>
+                <th class="py-2.5 px-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: PUNTO DE VENTA (VENTA RÁPIDA POR LOTES)                 -->
+    <!-- ============================================================== -->
+    <section id="tabPos" class="tab-content hidden space-y-6">
+
+      <div class="bg-emerald-900 text-white p-5 rounded-3xl shadow-lg border border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-300">Punto de Venta Agrupado</span>
+          <h2 class="text-xl sm:text-2xl font-black">Ventas de la Noche & Mostrador</h2>
+          <p class="text-xs text-emerald-200 mt-0.5">Añade todas las prendas vendidas en un solo lote y confírmalas todas en bloque.</p>
+        </div>
+
+        <button onclick="openModalBatchSale()" class="bg-white text-emerald-950 hover:bg-emerald-50 font-black px-4 py-2.5 rounded-2xl text-xs shadow transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
+          <span>+ Añadir Venta</span>
+        </button>
+      </div>
+
+      <!-- Historial de Ventas -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="font-extrabold text-sm text-slate-800">Historial Detallado de Ventas Realizadas</h4>
+          <span class="text-xs text-slate-400">Total ventas registradas</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
+                <th class="py-2.5 px-2">Fecha</th>
+                <th class="py-2.5 px-2">Cliente</th>
+                <th class="py-2.5 px-2">Prenda Vendida</th>
+                <th class="py-2.5 px-2 text-right">Cant.</th>
+                <th class="py-2.5 px-2 text-right">Precio Venta</th>
+                <th class="py-2.5 px-2 text-right">Total Cobrado</th>
+                <th class="py-2.5 px-2 text-right">Capital Recup.</th>
+                <th class="py-2.5 px-2 text-right">Ganancia Neta</th>
+                <th class="py-2.5 px-2 text-center">Factura SRI</th>
+                <th class="py-2.5 px-2 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="salesTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 4: CONTABILIDAD LOCAL DE ROPA                              -->
+    <!-- ============================================================== -->
+    <section id="tabStore" class="tab-content hidden space-y-6">
+
+      <div class="bg-purple-900 text-white p-5 rounded-3xl shadow-lg border border-purple-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-purple-300">Flujo de Caja del Negocio</span>
+          <h2 class="text-xl sm:text-2xl font-black">Contabilidad — Local de Ropa</h2>
+          <p class="text-xs text-purple-200 mt-0.5">Ingresos por ventas, costos de mercadería y gastos operativos del local.</p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="openModalUniversalIncome('store')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3.5 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>+ Ingreso del Local</span>
+          </button>
+          <button onclick="openModalUniversalExpense('store')" class="bg-rose-500 hover:bg-rose-400 text-white font-bold px-3.5 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+            <span>- Registrar Gasto del Local</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h4 class="font-extrabold text-sm text-slate-800">Libro Contable del Local</h4>
+          
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-slate-600">Mes:</label>
+            <select id="selectStoreAccountingMonth" onchange="renderStoreAccounting()" class="bg-slate-100 border border-slate-300 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-800 outline-none">
+              <option value="all">Todo el Año</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9" selected>Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="p-3 bg-emerald-50 rounded-2xl">
+            <span class="text-[10px] text-emerald-800 font-bold uppercase block">Ingresos Local</span>
+            <span id="storePeriodIncome" class="font-mono font-black text-sm text-emerald-700">$0.00</span>
+          </div>
+          <div class="p-3 bg-rose-50 rounded-2xl">
+            <span class="text-[10px] text-rose-800 font-bold uppercase block">Egresos Local</span>
+            <span id="storePeriodExpense" class="font-mono font-black text-sm text-rose-700">$0.00</span>
+          </div>
+          <div class="p-3 bg-purple-50 rounded-2xl">
+            <span class="text-[10px] text-purple-800 font-bold uppercase block">Saldo Neto</span>
+            <span id="storePeriodNet" class="font-mono font-black text-sm text-purple-900">$0.00</span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
+                <th class="py-2 px-2">Fecha</th>
+                <th class="py-2 px-2">Tipo</th>
+                <th class="py-2 px-2">Categoría</th>
+                <th class="py-2 px-2">Detalle</th>
+                <th class="py-2 px-2 text-right">Monto</th>
+                <th class="py-2 px-2 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="storeAccountingTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 5: FINANZAS PERSONALES                                     -->
+    <!-- ============================================================== -->
+    <section id="tabPersonal" class="tab-content hidden space-y-6">
+
+      <div class="bg-blue-900 text-white p-5 rounded-3xl shadow-lg border border-blue-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-blue-300">Cuenta Privada</span>
+          <h2 class="text-xl sm:text-2xl font-black">Finanzas Personales</h2>
+          <p class="text-xs text-blue-200 mt-0.5">Control de ingresos personales, ahorros y gastos propios del hogar.</p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="openModalUniversalExpense('personal')" class="bg-rose-500 hover:bg-rose-400 text-white font-bold px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+            <span>- Gasto Personal</span>
+          </button>
+          <button onclick="openModalUniversalIncome('personal')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>+ Ingreso Personal</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Historial de Movimientos Personales -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="font-extrabold text-sm text-slate-800">Movimientos Personales del Período</h4>
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-slate-600">Mes:</label>
+            <select id="selectPersonalMonth" onchange="renderPersonalTransactions()" class="bg-slate-100 border border-slate-300 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-800 outline-none">
+              <option value="all">Todo el Año</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9" selected>Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
+                <th class="py-2 px-2">Fecha</th>
+                <th class="py-2 px-2">Tipo</th>
+                <th class="py-2 px-2">Categoría</th>
+                <th class="py-2 px-2">Detalle</th>
+                <th class="py-2 px-2 text-right">Monto</th>
+                <th class="py-2 px-2 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="personalTransactionsTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB: CONTROL UNIFICADO DE DEUDAS (LOCAL O PERSONAL)           -->
+    <!-- ============================================================== -->
+    <section id="tabDebts" class="tab-content hidden space-y-6">
+
+      <div class="bg-rose-950 text-white p-5 rounded-3xl shadow-lg border border-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-rose-300">Obligaciones Financieras</span>
+          <h2 class="text-xl sm:text-2xl font-black">Control Unificado de Deudas</h2>
+          <p class="text-xs text-rose-200 mt-0.5">Define si la deuda es del Negocio o Personal. Los abonos amortizan el saldo y se descuentan en contabilidad.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openModalDebt()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-3.5 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+            <span>+ Nueva Deuda</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtro y Tarjetas de Deudas -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button onclick="filterDebtsList('all')" id="btnFilterDebtAll" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Todas</button>
+            <button onclick="filterDebtsList('store')" id="btnFilterDebtStore" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🏬 Local de Ropa</button>
+            <button onclick="filterDebtsList('personal')" id="btnFilterDebtPersonal" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">💳 Personal</button>
+          </div>
+          <span class="text-xs text-slate-400">Saldo Actual = Monto Inicial − Abonos</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="unifiedDebtsCardsContainer"></div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB: ADMINISTRADOR DE CATEGORÍAS                              -->
+    <!-- ============================================================== -->
+    <section id="tabCategories" class="tab-content hidden space-y-6">
+
+      <div class="bg-indigo-950 text-white p-5 rounded-3xl shadow-lg border border-indigo-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-indigo-300">Catálogos & Clasificación</span>
+          <h2 class="text-xl sm:text-2xl font-black">Administrador de Categorías</h2>
+          <p class="text-xs text-indigo-200 mt-0.5">Personaliza las categorías que aparecerán en todos tus formularios.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Categorías de Gastos Local -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="font-extrabold text-sm text-purple-900">🏬 Gastos Local de Ropa</h4>
+          </div>
+          <div class="flex gap-2">
+            <input type="text" id="inputNewStoreExpenseCat" placeholder="Nueva categoría..." class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-300 font-semibold outline-none focus:border-purple-500">
+            <button onclick="addCustomCategory('storeExpense')" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow">+</button>
+          </div>
+          <ul id="listStoreExpenseCats" class="space-y-1.5 max-h-60 overflow-y-auto text-xs"></ul>
+        </div>
+
+        <!-- Categorías de Gastos Personal -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="font-extrabold text-sm text-blue-900">💳 Gastos Personales</h4>
+          </div>
+          <div class="flex gap-2">
+            <input type="text" id="inputNewPersonalExpenseCat" placeholder="Nueva categoría..." class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-300 font-semibold outline-none focus:border-blue-500">
+            <button onclick="addCustomCategory('personalExpense')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow">+</button>
+          </div>
+          <ul id="listPersonalExpenseCats" class="space-y-1.5 max-h-60 overflow-y-auto text-xs"></ul>
+        </div>
+
+        <!-- Categorías de Prendas / Ropa -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="font-extrabold text-sm text-emerald-900">👗 Categorías de Ropa</h4>
+          </div>
+          <div class="flex gap-2">
+            <input type="text" id="inputNewClothingCat" placeholder="Ej. Chaquetas, Poleras..." class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-300 font-semibold outline-none focus:border-emerald-500">
+            <button onclick="addCustomCategory('clothing')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow">+</button>
+          </div>
+          <ul id="listClothingCats" class="space-y-1.5 max-h-60 overflow-y-auto text-xs"></ul>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 6: TRANSFERENCIAS INTERCUENTAS                             -->
+    <!-- ============================================================== -->
+    <section id="tabTransfers" class="tab-content hidden space-y-6">
+
+      <div class="bg-amber-500 text-slate-950 p-5 rounded-3xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] uppercase font-black tracking-wider text-amber-950">Movimiento Seguro de Dinero</span>
+          <h2 class="text-xl sm:text-2xl font-black">Transferencias entre Cuentas</h2>
+          <p class="text-xs font-semibold text-amber-950/80 mt-0.5">Operación atómica: resta de una cuenta y suma a la otra dejando historial auditado.</p>
+        </div>
+
+        <button onclick="openModalTransfer()" class="bg-slate-950 text-white hover:bg-slate-800 font-bold px-4 py-2.5 rounded-2xl text-xs shadow transition active:scale-95 flex items-center gap-2">
+          <i data-lucide="arrow-left-right" class="w-4 h-4 text-amber-400"></i>
+          <span>Nueva Transferencia</span>
+        </button>
+      </div>
+
+      <!-- Tarjetas de Saldo Actual -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-4 bg-white rounded-3xl border border-slate-200 shadow-sm">
+          <span class="text-[10px] uppercase font-bold text-purple-600 block">Saldo Actual Local de Ropa</span>
+          <span id="transferCardStoreBalance" class="font-mono text-xl font-extrabold text-slate-900">$0.00</span>
+        </div>
+        <div class="p-4 bg-white rounded-3xl border border-slate-200 shadow-sm">
+          <span class="text-[10px] uppercase font-bold text-blue-600 block">Saldo Actual Personal</span>
+          <span id="transferCardPersonalBalance" class="font-mono text-xl font-extrabold text-slate-900">$0.00</span>
+        </div>
+      </div>
+
+      <!-- Historial de Transferencias -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <h4 class="font-extrabold text-sm text-slate-800">Reporte Exclusivo de Transferencias Realizadas</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
+                <th class="py-2 px-2">Fecha</th>
+                <th class="py-2 px-2">Cuenta Origen</th>
+                <th class="py-2 px-2">Cuenta Destino</th>
+                <th class="py-2 px-2">Nota / Justificación</th>
+                <th class="py-2 px-2 text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody id="transfersHistoryTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 7: FACTURA FORMAL SRI ECUADOR (RIDE IMPRIMIBLE/PDF)        -->
+    <!-- ============================================================== -->
+    <section id="tabInvoiceView" class="tab-content hidden space-y-6">
+
+      <div class="no-print bg-slate-900 text-white p-5 rounded-3xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-blue-300">Comprobante Electrónico Formal</span>
+          <h2 class="text-xl sm:text-2xl font-black">Factura SRI Ecuador (RIDE)</h2>
+          <p class="text-xs text-slate-300 mt-0.5">Formato oficial con RUC, Clave de Acceso (49 dígitos), desglose de IVA (15%) y datos personalizables.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openModalInvoiceEditor()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3.5 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
+            <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+            <span>Editar Datos Emisor</span>
+          </button>
+          <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Imprimir / Guardar PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Área de Factura RIDE -->
+      <div id="printableInvoiceArea" class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-300 shadow-lg text-slate-900 max-w-4xl mx-auto space-y-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-slate-300">
+          
+          <!-- Datos del Emisor -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">🛍️</span>
+              <h2 id="invIssuerTradeName" class="text-xl font-extrabold tracking-tight text-slate-900 uppercase">BOUTIQUE JHORDY</h2>
+            </div>
+            <p class="text-xs text-slate-600">Razón Social: <span id="invIssuerName" class="font-bold text-slate-800">JHORDY ALEXANDER</span></p>
+            <p class="text-xs text-slate-600">Dirección Matriz: <span id="invIssuerAddress" class="font-semibold text-slate-800">Sangolquí, Pichincha, Ecuador</span></p>
+            <p class="text-xs text-slate-600">Teléfono: <span id="invIssuerPhone" class="font-semibold text-slate-800">0963923399</span></p>
+            <div class="pt-1 text-[11px] text-slate-500 space-y-0.5">
+              <p>OBLIGADO A LLEVAR CONTABILIDAD: <span id="invAccountingObliged" class="font-bold text-slate-700">NO</span></p>
+              <p>CONTRIBUYENTE RÉGIMEN RIMPE - NEGOCIO POPULAR</p>
+            </div>
+          </div>
+
+          <!-- Caja de Autorización SRI -->
+          <div class="p-4 rounded-2xl border-2 border-slate-800 space-y-2 bg-slate-50">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-slate-600">R.U.C.:</span>
+              <span id="invIssuerRuc" class="font-mono font-black text-sm text-slate-900">1726392339001</span>
+            </div>
+            <div class="text-center bg-slate-900 text-white py-1 rounded-lg">
+              <span class="text-xs font-black tracking-wider uppercase">F A C T U R A</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-slate-600">No.:</span>
+              <span id="invNumber" class="font-mono font-bold text-slate-900">001-001-000000210</span>
+            </div>
+            <div class="text-xs space-y-0.5 pt-1 border-t border-slate-200">
+              <p class="text-[10px] text-slate-500">NÚMERO DE AUTORIZACIÓN:</p>
+              <p id="invAuthNumber" class="font-mono text-[9px] font-bold break-all leading-tight">2309202601172639233900120010010000002101234567819</p>
+            </div>
+            <div class="text-xs space-y-0.5">
+              <p class="text-[10px] text-slate-500">CLAVE DE ACCESO:</p>
+              <div class="bg-white p-1.5 border border-slate-300 rounded font-mono text-[8px] font-bold break-all text-center tracking-widest text-slate-800" id="invAccessKey">
+                2309202601172639233900120010010000002101234567819
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Datos del Cliente / Comprador -->
+        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div>
+            <span class="text-slate-500 font-bold block">Razón Social / Comprador:</span>
+            <span id="invClientName" class="font-extrabold text-slate-900 text-sm">CONSUMIDOR FINAL</span>
+          </div>
+          <div>
+            <span class="text-slate-500 font-bold block">Identificación / RUC / Cédula:</span>
+            <span id="invClientRuc" class="font-mono font-bold text-slate-800">9999999999999</span>
+          </div>
+          <div>
+            <span class="text-slate-500 font-bold block">Fecha de Emisión:</span>
+            <span id="invEmissionDate" class="font-semibold text-slate-800">23/09/2026</span>
+          </div>
+          <div>
+            <span class="text-slate-500 font-bold block">Dirección:</span>
+            <span id="invClientAddress" class="font-semibold text-slate-800">Ecuador</span>
+          </div>
+        </div>
+
+        <!-- Detalle de Productos -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border border-slate-200">
+            <thead class="bg-slate-900 text-white font-bold text-[10px] uppercase">
+              <tr>
+                <th class="py-2 px-3">Código</th>
+                <th class="py-2 px-3">Cantidad</th>
+                <th class="py-2 px-3">Descripción / Prenda</th>
+                <th class="py-2 px-3 text-right">Precio Unit.</th>
+                <th class="py-2 px-3 text-right">Descuento</th>
+                <th class="py-2 px-3 text-right">Precio Total</th>
+              </tr>
+            </thead>
+            <tbody id="invItemsTableBody" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+
+        <!-- Resumen de Impuestos y Totales -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+          <div class="space-y-3 text-xs">
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+              <span class="font-bold text-slate-700 block mb-1">Información Adicional:</span>
+              <p class="text-slate-600">Email: <span id="invClientEmail">cliente@email.com</span></p>
+              <p class="text-slate-600">Forma de Pago: <span class="font-bold">01 - SIN UTILIZACION DEL SISTEMA FINANCIERO (EFECTIVO)</span></p>
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 space-y-1.5 text-xs">
+            <div class="flex justify-between text-slate-600">
+              <span>SUBTOTAL 15%:</span>
+              <span id="invSubtotal15" class="font-mono font-bold">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>SUBTOTAL 0%:</span>
+              <span id="invSubtotal0" class="font-mono font-bold">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>IVA 15%:</span>
+              <span id="invTaxAmount" class="font-mono font-bold">$0.00</span>
+            </div>
+            <div class="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-300">
+              <span>VALOR TOTAL:</span>
+              <span id="invGrandTotal" class="font-mono text-purple-700">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Barra de Navegación Inferior Móvil Fija -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-1 py-1.5 shadow-2xl no-print flex items-center justify-around text-[10px] font-bold">
+    <button onclick="switchMainTab('tabHome')" id="mobTabHome" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-purple-400 transition">
+      <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+      <span>Dashboard</span>
+    </button>
+    <button onclick="switchMainTab('tabInventory')" id="mobTabInventory" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400 hover:text-white transition">
+      <i data-lucide="package" class="w-4 h-4"></i>
+      <span>Stock</span>
+    </button>
+    <button onclick="switchMainTab('tabPos')" id="mobTabPos" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400 hover:text-white transition">
+      <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+      <span>Vender</span>
+    </button>
+    <button onclick="switchMainTab('tabDebts')" id="mobTabDebts" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400 hover:text-white transition">
+      <i data-lucide="credit-card" class="w-4 h-4"></i>
+      <span>Deudas</span>
+    </button>
+    <button onclick="switchMainTab('tabStore')" id="mobTabStore" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400 hover:text-white transition">
+      <i data-lucide="store" class="w-4 h-4"></i>
+      <span>Local</span>
+    </button>
+  </nav>
+
+  <!-- Pie de Página Oficial con Créditos -->
+  <footer class="no-print mt-auto bg-slate-950 text-slate-400 border-t border-slate-800 py-6 px-4">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div>
+        <p class="text-xs text-slate-300 font-semibold flex items-center justify-center sm:justify-start gap-2">
+          <span>Diseñado por <span class="text-amber-400 font-extrabold">I´m_Jhordy</span></span>
+          <span class="text-slate-600">•</span>
+          <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-pink-400 hover:text-pink-300 font-bold transition">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+            </svg>
+            <span>TikTok</span>
+          </a>
+        </p>
+        <p class="text-[11px] text-slate-500 mt-1">Almacenamiento privado en tu dispositivo. Compatible con importación Excel / Google Sheets.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="https://wa.me/593963923399?text=Hola%20Jhordy,%20tengo%20una%20consulta%20sobre%20el%20sistema%20del%20local%20de%20ropa" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-2xl flex items-center gap-2 shadow transition active:scale-95">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>Contacto: 0963923399</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- MODALES DE CONTROL, OPERACIÓN Y CARGA DE EXCEL                -->
+  <!-- ============================================================== -->
+
+  <!-- Modal 1: REGISTRAR GASTO UNIVERSAL -->
+  <div id="modalUniversalExpense" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="minus-circle" class="w-4 h-4 text-rose-600"></i>
+          <span>Registrar Gasto / Egreso</span>
+        </h3>
+        <button onclick="closeModal('modalUniversalExpense')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="formUniversalExpense" onsubmit="saveUniversalExpense(event)" class="space-y-3.5 text-xs">
+        <div class="p-3 bg-purple-50 rounded-2xl border border-purple-200 space-y-1.5">
+          <label class="block font-black text-purple-900 text-xs">¿De dónde se pagará este gasto?</label>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-purple-300 font-bold text-purple-900 cursor-pointer">
+              <input type="radio" name="expenseAccountChoice" value="store" checked onchange="updateExpenseCategoryOptions()" class="accent-purple-600">
+              <span>🏬 Local de Ropa</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-300 font-bold text-slate-700 cursor-pointer">
+              <input type="radio" name="expenseAccountChoice" value="personal" onchange="updateExpenseCategoryOptions()" class="accent-blue-600">
+              <span>💳 Personal</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha</label>
+            <input type="date" id="expenseDate" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Monto ($ USD)</label>
+            <input type="number" step="0.01" min="0.01" id="expenseAmount" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold text-base">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Categoría del Gasto</label>
+          <select id="expenseCategory" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold bg-white"></select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Detalle / Descripción</label>
+          <input type="text" id="expenseDetail" required placeholder="Ej. Pago de arriendo, fundas, almuerzo..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalUniversalExpense')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow">Guardar Gasto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: REGISTRAR INGRESO UNIVERSAL (LOCAL O PERSONAL) -->
+  <div id="modalUniversalIncome" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
+          <span>Registrar Ingreso de Dinero</span>
+        </h3>
+        <button onclick="closeModal('modalUniversalIncome')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="formUniversalIncome" onsubmit="saveUniversalIncome(event)" class="space-y-3.5 text-xs">
+        <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-1.5">
+          <label class="block font-black text-emerald-900 text-xs">¿A qué cuenta ingresa este dinero?</label>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-emerald-300 font-bold text-emerald-900 cursor-pointer">
+              <input type="radio" name="incomeAccountChoice" value="store" checked onchange="updateIncomeCategoryOptions()" class="accent-emerald-600">
+              <span>🏬 Local de Ropa</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-300 font-bold text-slate-700 cursor-pointer">
+              <input type="radio" name="incomeAccountChoice" value="personal" onchange="updateIncomeCategoryOptions()" class="accent-blue-600">
+              <span>💳 Personal</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha</label>
+            <input type="date" id="universalIncomeDate" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Monto ($ USD)</label>
+            <input type="number" step="0.01" min="0.01" id="universalIncomeAmount" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold text-base">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Categoría del Ingreso</label>
+          <select id="universalIncomeCategory" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold bg-white"></select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Detalle / Origen del Dinero</label>
+          <input type="text" id="universalIncomeDetail" required placeholder="Ej. Aporte de capital, venta particular, sueldo..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalUniversalIncome')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow">Guardar Ingreso</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: CARGAR MERCADERÍA VÍA EXCEL / CSV -->
+  <div id="modalImportExcel" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4 text-purple-600"></i>
+          <span>Subir Mercadería por Archivo Excel</span>
+        </h3>
+        <button onclick="closeModal('modalImportExcel')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="text-xs text-slate-600 space-y-2 leading-relaxed bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+        <p class="font-bold text-slate-800">Sube cualquier archivo Excel (.xlsx, .xls) o CSV con tu mercadería.</p>
+        <p>El sistema detecta automáticamente columnas como: <b>Código, Prenda/Producto, Categoría, Talla, Color, Cantidad/Stock, Costo</b> y <b>Precio Venta (PVP)</b>.</p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="border-2 border-dashed border-purple-300 hover:border-purple-500 rounded-2xl p-6 text-center cursor-pointer bg-purple-50/50 transition" onclick="document.getElementById('excelFileInput').click()">
+          <i data-lucide="upload-cloud" class="w-8 h-8 text-purple-600 mx-auto mb-2"></i>
+          <span class="font-bold text-xs text-purple-900 block">Toca aquí para seleccionar tu archivo Excel</span>
+          <span class="text-[10px] text-slate-500">Formatos compatibles: .xlsx, .xls, .csv</span>
+        </div>
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelFileUpload(event)">
+
+        <!-- Previsualización de los datos leídos -->
+        <div id="excelPreviewSection" class="hidden space-y-2">
+          <span class="font-black text-xs text-slate-800 block">Prendas detectadas en el archivo: <span id="excelDetectedCount" class="text-purple-600">0</span></span>
+          <div class="max-h-40 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50 text-[11px]">
+            <ul id="excelPreviewList" class="space-y-1"></ul>
+          </div>
+          <button onclick="confirmExcelImport()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow transition">
+            Confirmar y Añadir al Inventario
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-between items-center border-t border-slate-100">
+        <button onclick="downloadExcelTemplate()" class="text-xs text-purple-600 hover:underline font-bold flex items-center gap-1">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>Descargar Plantilla Vacía</span>
+        </button>
+        <button onclick="closeModal('modalImportExcel')" class="px-4 py-2 font-bold text-xs text-slate-500">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: NUEVA PRENDA MANUAL -->
+  <div id="modalNewProduct" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900">Agregar Prenda al Inventario</h3>
+        <button onclick="closeModal('modalNewProduct')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="formNewProduct" onsubmit="saveManualProduct(event)" class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Código / SKU</label>
+            <input type="text" id="prodCode" placeholder="Ej. CAM-01 (Opcional)" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Categoría</label>
+            <select id="prodCategory" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold bg-white"></select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Prenda / Descripción *</label>
+          <input type="text" id="prodName" required placeholder="Ej. Camiseta Polo Algodón, Jean Slim Fit..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Talla (Opcional)</label>
+            <input type="text" id="prodSize" placeholder="M, 32, 40" class="w-full px-2 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Color (Opcional)</label>
+            <input type="text" id="prodColor" placeholder="Negro, Azul" class="w-full px-2 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Stock *</label>
+            <input type="number" min="0" id="prodStock" required value="1" class="w-full px-2 py-2 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Costo Unitario ($ Compra) *</label>
+            <input type="number" step="0.01" min="0" id="prodCost" required placeholder="10.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Precio Venta ($ PVP) *</label>
+            <input type="number" step="0.01" min="0" id="prodPrice" required placeholder="20.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalNewProduct')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold shadow">Guardar Prenda</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: TRANSFERENCIAS ENTRE CUENTAS -->
+  <div id="modalTransfer" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="arrow-left-right" class="w-4 h-4 text-amber-500"></i>
+          <span>Transferir entre Cuentas</span>
+        </h3>
+        <button onclick="closeModal('modalTransfer')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="formTransfer" onsubmit="executeTransfer(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Dirección de la Transferencia</label>
+          <select id="transferDirection" onchange="updateTransferMaxNotice()" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold bg-slate-50">
+            <option value="store_to_personal">🛍️ De Local de Ropa ➔ 💳 A Personal (Retiro utilidades)</option>
+            <option value="personal_to_store">💳 De Personal ➔ 🛍️ A Local de Ropa (Inyección capital)</option>
+          </select>
+        </div>
+
+        <div id="transferOriginNotice" class="p-2.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 font-mono font-bold text-[11px]">
+          Saldo disponible: $0.00
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha</label>
+            <input type="date" id="transferDate" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Monto ($ USD)</label>
+            <input type="number" step="0.01" min="0.01" id="transferAmount" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold text-base">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nota / Detalle</label>
+          <input type="text" id="transferNote" required placeholder="Ej. Retiro quincenal de ganancias..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalTransfer')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shadow">Transferir Dinero</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PASAR VENTAS DE LA NOCHE (LOTE / CARRITO RÁPIDO) -->
+  <div id="modalBatchSale" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-3xl p-5 sm:p-6 max-w-2xl w-full shadow-2xl space-y-4 border border-slate-200 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+            <i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-600"></i>
+            <span>Añadir Venta (Lote Rápido)</span>
+          </h3>
+          <p class="text-[11px] text-slate-500">Agrega todas las prendas vendidas y confirma todo en un solo clic.</p>
+        </div>
+        <button onclick="closeModal('modalBatchSale')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Datos Generales de la Venta -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Fecha</label>
+          <input type="date" id="batchSaleDate" required class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Forma de Pago</label>
+          <select id="batchSalePayment" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold bg-white">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia Bancaria</option>
+            <option value="Tarjeta">Tarjeta Débito/Crédito</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Cliente (Opcional)</label>
+          <input type="text" id="batchSaleClient" placeholder="Consumidor Final" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-semibold">
+        </div>
+      </div>
+
+      <!-- Selector Rápido con Búsqueda de Prendas -->
+      <div class="p-3.5 bg-purple-50 rounded-2xl border border-purple-200 space-y-2.5 text-xs">
+        <span class="font-black text-purple-950 block">Seleccionar Prenda para Añadir:</span>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-slate-600 mb-0.5">Buscar Prenda</label>
+            <input type="text" id="batchSearchProd" oninput="filterSaleProductDropdown()" placeholder="Escribe para buscar..." class="w-full px-2.5 py-1.5 rounded-xl border border-purple-300 bg-white font-semibold">
+            <select id="batchSaleProductSelect" onchange="onSelectBatchSaleProduct()" class="w-full mt-1 px-2.5 py-1.5 rounded-xl border border-purple-300 font-bold bg-white"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-0.5">Cantidad</label>
+            <input type="number" min="1" id="batchSaleQty" value="1" class="w-full px-2.5 py-1.5 rounded-xl border border-purple-300 font-mono font-bold text-sm">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-0.5">Precio Cobrado ($)</label>
+            <input type="number" step="0.01" min="0.01" id="batchSalePrice" class="w-full px-2.5 py-1.5 rounded-xl border border-purple-300 font-mono font-bold text-sm">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <span id="batchSaleStockBadge" class="font-mono text-[11px] text-purple-900 font-bold">Stock disponible: -</span>
+          <button type="button" onclick="addItemToBatchSale()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 active:scale-95 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>➕ Añadir a la Venta</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla del Carrito de la Noche -->
+      <div class="space-y-2 text-xs">
+        <span class="font-black text-slate-800 block">Prendas en esta Venta (<span id="batchItemsCount">0</span>):</span>
+        <div class="max-h-48 overflow-y-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 text-slate-500 font-bold text-[10px] uppercase">
+              <tr>
+                <th class="py-2 px-2.5">Prenda</th>
+                <th class="py-2 px-2 text-right">Cant.</th>
+                <th class="py-2 px-2 text-right">Precio Unit.</th>
+                <th class="py-2 px-2 text-right">Subtotal</th>
+                <th class="py-2 px-2 text-center">Quitar</th>
+              </tr>
+            </thead>
+            <tbody id="batchSaleTableBody" class="divide-y divide-slate-100 font-semibold">
+              <tr><td colspan="5" class="text-center py-4 text-slate-400">Aún no has añadido prendas a esta venta.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Totales del Lote -->
+      <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 grid grid-cols-3 gap-2 text-center text-xs">
+        <div>
+          <span class="text-emerald-800 font-bold block text-[10px]">Total Venta</span>
+          <span id="batchTotalPaid" class="font-mono font-black text-emerald-700 text-sm sm:text-base">$0.00</span>
+        </div>
+        <div>
+          <span class="text-blue-800 font-bold block text-[10px]">Capital Recuperado</span>
+          <span id="batchTotalCost" class="font-mono font-black text-blue-700 text-sm sm:text-base">$0.00</span>
+        </div>
+        <div>
+          <span class="text-emerald-800 font-bold block text-[10px]">Ganancia Neta</span>
+          <span id="batchTotalProfit" class="font-mono font-black text-emerald-700 text-sm sm:text-base">$0.00</span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+        <button type="button" onclick="closeModal('modalBatchSale')" class="px-4 py-2 font-bold text-slate-500 text-xs">Cancelar</button>
+        <button type="button" onclick="confirmBatchSale()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow flex items-center gap-1.5 active:scale-95 transition">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>🚀 Confirmar y Procesar Venta Completa</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: COMPRAR / INGRESAR MERCADERÍA EN LOTE -->
+  <div id="modalBatchRestock" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-3xl p-5 sm:p-6 max-w-2xl w-full shadow-2xl space-y-4 border border-slate-200 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+            <i data-lucide="truck" class="w-5 h-5 text-purple-600"></i>
+            <span>Ingreso de Mercadería Comprada (Lote)</span>
+          </h3>
+          <p class="text-[11px] text-slate-500">Añade prendas compradas (nuevas o existentes) y súbelas todas de golpe.</p>
+        </div>
+        <button onclick="closeModal('modalBatchRestock')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Fecha de Compra</label>
+          <input type="date" id="batchRestockDate" required class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Proveedor / Nota (Opcional)</label>
+          <input type="text" id="batchRestockSupplier" placeholder="Ej. Mayorista El Tejar" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-semibold">
+        </div>
+      </div>
+
+      <!-- Selector o Creador de Prenda -->
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="font-black text-slate-800">Prenda a Ingresar:</span>
+          <div class="flex gap-2">
+            <label class="flex items-center gap-1 text-[11px] font-bold text-purple-700 cursor-pointer">
+              <input type="radio" name="restockMode" value="existing" checked onchange="toggleRestockMode()" class="accent-purple-600">
+              <span>Prenda Existente (Sumar Stock)</span>
+            </label>
+            <label class="flex items-center gap-1 text-[11px] font-bold text-slate-600 cursor-pointer">
+              <input type="radio" name="restockMode" value="new" onchange="toggleRestockMode()" class="accent-purple-600">
+              <span>Prenda Nueva</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Modo Prenda Existente -->
+        <div id="restockExistingContainer">
+          <label class="block font-bold text-slate-600 mb-1">Elegir Prenda Existente</label>
+          <select id="restockProductSelect" onchange="onSelectRestockExistingProduct()" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold bg-white"></select>
+        </div>
+
+        <!-- Modo Prenda Nueva -->
+        <div id="restockNewContainer" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div>
+            <label class="block font-bold text-slate-600 mb-0.5">Nombre de la Prenda *</label>
+            <input type="text" id="restockNewName" placeholder="Ej. Chaqueta Jean" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-0.5">Categoría</label>
+            <select id="restockNewCategory" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold bg-white"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-0.5">Código (Opcional)</label>
+            <input type="text" id="restockNewCode" placeholder="Auto si dejas vacío" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+        </div>
+
+        <!-- Valores de Cantidad y Costo -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          <div>
+            <label class="block font-bold text-slate-600 mb-0.5">Cantidad Comprada *</label>
+            <input type="number" min="1" id="restockQty" value="1" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-0.5">Costo Unitario ($) *</label>
+            <input type="number" step="0.01" min="0" id="restockCost" placeholder="0.00" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-0.5">PVP Venta ($) *</label>
+            <input type="number" step="0.01" min="0" id="restockPrice" placeholder="0.00" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-400 mb-0.5">Talla / Color (Opcional)</label>
+            <input type="text" id="restockSizeColor" placeholder="M / Azul" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-slate-500 font-semibold">
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-1">
+          <button type="button" onclick="addItemToBatchRestock()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 active:scale-95 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>➕ Añadir al Lote de Compra</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla del Lote de Compra -->
+      <div class="space-y-2 text-xs">
+        <span class="font-black text-slate-800 block">Prendas en esta Compra (<span id="batchRestockItemsCount">0</span>):</span>
+        <div class="max-h-48 overflow-y-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 text-slate-500 font-bold text-[10px] uppercase">
+              <tr>
+                <th class="py-2 px-2.5">Prenda</th>
+                <th class="py-2 px-2 text-right">Cant.</th>
+                <th class="py-2 px-2 text-right">Costo Unit.</th>
+                <th class="py-2 px-2 text-right">Total Invertido</th>
+                <th class="py-2 px-2 text-center">Quitar</th>
+              </tr>
+            </thead>
+            <tbody id="batchRestockTableBody" class="divide-y divide-slate-100 font-semibold">
+              <tr><td colspan="5" class="text-center py-4 text-slate-400">Aún no has añadido prendas al lote de compra.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="p-3 bg-purple-50 rounded-2xl border border-purple-200 flex justify-between items-center text-xs">
+        <span class="font-bold text-purple-900">Total a Invertir en Mercadería:</span>
+        <span id="batchRestockTotalInvestment" class="font-mono font-black text-purple-950 text-base">$0.00</span>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+        <button type="button" onclick="closeModal('modalBatchRestock')" class="px-4 py-2 font-bold text-slate-500 text-xs">Cancelar</button>
+        <button type="button" onclick="confirmBatchRestock()" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow flex items-center gap-1.5 active:scale-95 transition">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>📦 Guardar Toda la Mercadería Comprada</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVA DEUDA (UNIFICADO LOCAL O PERSONAL) -->
+  <div id="modalDebt" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="credit-card" class="w-4 h-4 text-rose-600"></i>
+          <span>Nueva Obligación / Deuda</span>
+        </h3>
+        <button onclick="closeModal('modalDebt')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="formDebt" onsubmit="saveUnifiedDebt(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-black text-slate-800 mb-1">¿A qué cuenta pertenece esta deuda?</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-purple-50 border border-purple-300 font-bold text-purple-900 cursor-pointer">
+              <input type="radio" name="debtAccountChoice" value="store" checked class="accent-purple-600">
+              <span>🏬 Local de Ropa</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-blue-50 border border-blue-300 font-bold text-blue-900 cursor-pointer">
+              <input type="radio" name="debtAccountChoice" value="personal" class="accent-blue-600">
+              <span>💳 Personal</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nombre / Entidad / Acreedor</label>
+          <input type="text" id="debtName" required placeholder="Ej. Crédito Mercadería Mayorista, Tarjeta Banco..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Monto Inicial ($)</label>
+            <input type="number" step="0.01" min="0.01" id="debtInitial" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Cuota Mensual ($)</label>
+            <input type="number" step="0.01" min="0" id="debtQuota" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha Inicio</label>
+            <input type="date" id="debtStart" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha Límite / Fin</label>
+            <input type="date" id="debtEnd" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalDebt')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow">Guardar Deuda</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ABONO A DEUDA -->
+  <div id="modalDebtPayment" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
+          <span>Registrar Abono a Deuda</span>
+        </h3>
+        <button onclick="closeModal('modalDebtPayment')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="formDebtPayment" onsubmit="saveDebtPayment(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Seleccionar Deuda</label>
+          <select id="debtPaySelect" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold bg-white"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha de Pago</label>
+            <input type="date" id="debtPayDate" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Monto del Abono ($)</label>
+            <input type="number" step="0.01" min="0.01" id="debtPayAmount" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold text-base">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nota / Detalle</label>
+          <input type="text" id="debtPayNote" placeholder="Ej. Cuota 3 de 12..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalDebtPayment')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow">Guardar Abono</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AJUSTES & RESPALDO -->
+  <div id="modalSettings" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="settings" class="w-4 h-4 text-slate-600"></i>
+          <span>Configuración & Respaldos</span>
+        </h3>
+        <button onclick="closeModal('modalSettings')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="saveSettings(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nombre del Local / Empresa</label>
+          <input type="text" id="settingStoreName" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nombre del Propietario</label>
+          <input type="text" id="settingOwnerName" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Tema Visual</label>
+            <select id="settingThemeSelect" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold bg-white">
+              <option value="light">☀️ Modo Claro</option>
+              <option value="dark">🌙 Modo Oscuro</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Contraseña Personal</label>
+            <input type="text" id="settingUserPassword" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold shadow transition">
+            Guardar Configuración
+          </button>
+        </div>
+      </form>
+
+      <!-- Respaldos -->
+      <div class="pt-3 border-t border-slate-100 space-y-2 text-xs">
+        <span class="font-black text-slate-800 block">Copias de Seguridad (Privadas en tu Móvil)</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="shareBackupData()" class="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-100 transition">
+            <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+            <span>Compartir Respaldo</span>
+          </button>
+          <button onclick="triggerImportBackup()" class="p-2.5 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 font-bold flex items-center justify-center gap-1.5 hover:bg-blue-100 transition">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+            <span>Restaurar Copia</span>
+          </button>
+          <input type="file" id="backupFileInput" accept=".json" class="hidden" onchange="handleBackupFile(event)">
+        </div>
+      </div>
+
+      <!-- Zona de Peligro -->
+      <div class="pt-3 border-t border-slate-100 space-y-2">
+        <span class="font-black text-rose-700 block text-xs">Zona de Seguridad</span>
+        <button onclick="openModalSecurityReset()" class="w-full py-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-bold text-xs rounded-xl transition">
+          🚨 Borrar Todos los Datos / Resetear Sistema
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAR BORRADO DE SEGURIDAD -->
+  <div id="modalSecurityReset" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-3 border border-slate-200 text-xs">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h4 class="font-black text-rose-600 text-sm flex items-center gap-1.5">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Confirmar Borrado Total</span>
+        </h4>
+        <button onclick="closeModal('modalSecurityReset')" class="text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <p class="text-slate-600">Ingresa tu contraseña personal o la clave maestra para vaciar todo el sistema:</p>
+      <input type="password" id="inputResetPassword" placeholder="Contraseña de seguridad..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-sm">
+      <div class="p-2 bg-slate-50 rounded-xl text-[11px] text-slate-500">
+        ¿Olvidaste tu contraseña? Comunícate con Jhordy al <b>0963923399</b> para tu clave de rescate.
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modalSecurityReset')" class="px-3 py-2 font-bold text-slate-500">Cancelar</button>
+        <button onclick="executeTotalReset()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-black rounded-xl">Borrar Todo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR EMISOR FACTURA SRI -->
+  <div id="modalInvoiceEditor" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 border border-slate-200 text-xs max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="font-black text-slate-900 text-sm">Datos del Emisor Factura SRI</h3>
+        <button onclick="closeModal('modalInvoiceEditor')" class="text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form onsubmit="saveInvoiceCustomData(event)" class="space-y-2.5">
+        <div>
+          <label class="block font-bold text-slate-700">RUC Emisor</label>
+          <input type="text" id="editInvRuc" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700">No. Factura Secuencial</label>
+          <input type="text" id="editInvNumber" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700">Nombre Comercial</label>
+          <input type="text" id="editInvTradeName" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700">Razón Social</label>
+          <input type="text" id="editInvName" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700">Dirección</label>
+          <input type="text" id="editInvAddress" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold">
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalInvoiceEditor')" class="px-3 py-1.5 text-slate-500 font-bold">Cancelar</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: GUÍA DE USO INTERACTIVA (TOUR PASO A PASO) -->
+  <div id="modalInteractiveTour" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2 text-purple-600">
+          <span id="tourIconStep" class="text-2xl">🛍️</span>
+          <div>
+            <h3 id="tourTitleStep" class="font-black text-base text-slate-900">Guía de Uso del Sistema</h3>
+            <span id="tourProgressBadge" class="text-[10px] font-bold uppercase tracking-wider text-purple-600">Paso 1 de 5</span>
+          </div>
+        </div>
+        <button onclick="closeModal('modalInteractiveTour')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-700 leading-relaxed min-h-[90px]" id="tourContentStep">
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <button id="btnTourPrev" onclick="prevTourStep()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition hidden">
+          Anterior
+        </button>
+        <div class="flex items-center gap-2 ml-auto">
+          <button onclick="closeModal('modalInteractiveTour')" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-600">
+            Saltar
+          </button>
+          <button id="btnTourNext" onclick="nextTourStep()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow transition active:scale-95">
+            Siguiente ➔
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION CORE ENGINE -->
+  <script>
+    const MASTER_RESCUE_KEY = "I´M_JHORDY";
+    const STORAGE_KEY = "boutique_jhordy_data_v2";
+
+    // Estado global de la aplicación
+    let appState = {
+      settings: {
+        storeName: "BOUTIQUE JHORDY",
+        ownerName: "Jhordy",
+        userPassword: "admin",
+        activeYear: "2026",
+        theme: "light",
+        invoice: {
+          ruc: "1726392339001",
+          number: "001-001-000000210",
+          tradeName: "BOUTIQUE JHORDY",
+          name: "JHORDY ALEXANDER",
+          address: "Sangolquí - Pichincha, Ecuador",
+          phone: "0963923399",
+          accounting: "NO"
+        }
+      },
+      categories: {
+        clothing: ["Hombre", "Mujer", "Niños", "Calzado", "Accesorios"],
+        storeExpense: ["Arriendo Local", "Insumos y Fundas", "Servicios (Luz/Internet)", "Publicidad y Redes", "Transporte / Flete", "Sueldos Personal", "Compra de Mercadería", "Pago de Deuda", "Otros Gastos Local"],
+        storeIncome: ["Venta Externa", "Aporte de Capital", "Cobro Especial", "Otros Ingresos Local"],
+        personalExpense: ["Alimentación", "Vivienda / Servicios", "Transporte Propio", "Salud", "Educación", "Cuota de Deuda", "Ocio / Varios"],
+        personalIncome: ["Sueldo / Salario", "Comisiones", "Inversiones", "Otros Ingresos"]
+      },
+      inventory: [
+        { id: "p1", code: "POLO-01", name: "Camiseta Polo Slim Fit", category: "Hombre", size: "M", color: "Negro", stock: 15, cost: 8.50, price: 18.00 },
+        { id: "p2", code: "JEAN-02", name: "Jean Stretch Clásico", category: "Mujer", size: "28", color: "Azul", stock: 12, cost: 14.00, price: 28.00 },
+        { id: "p3", code: "HOOD-03", name: "Chompa Hoodie Algodón", category: "Hombre", size: "L", color: "Gris", stock: 0, cost: 16.00, price: 32.00 }
+      ],
+      sales: [
+        { id: "s1", date: "2026-09-20", productId: "p1", productName: "Camiseta Polo Slim Fit", clientName: "Carlos Pérez", clientRuc: "1723456789", quantity: 2, unitPrice: 18.00, totalPaid: 36.00, costTotal: 17.00, profitTotal: 19.00, paymentMethod: "Efectivo" },
+        { id: "s2", date: "2026-09-22", productId: "p2", productName: "Jean Stretch Clásico", clientName: "Ana Gómez", clientRuc: "1719876543", quantity: 1, unitPrice: 28.00, totalPaid: 28.00, costTotal: 14.00, profitTotal: 14.00, paymentMethod: "Transferencia" }
+      ],
+      storeTransactions: [
+        { id: "st1", date: "2026-09-02", type: "egreso", category: "Arriendo Local", detail: "Pago mensual arriendo tienda", amount: 200.00 },
+        { id: "st2", date: "2026-09-05", type: "egreso", category: "Insumos y Fundas", detail: "Fundas con logo para ropa", amount: 45.00 }
+      ],
+      personalTransactions: [
+        { id: "pt1", date: "2026-09-01", type: "ingreso", category: "Sueldo / Salario", detail: "Ingreso particular", amount: 800.00 },
+        { id: "pt2", date: "2026-09-03", type: "egreso", category: "Alimentación", detail: "Compras de supermercado", amount: 120.00 }
+      ],
+      transfers: [
+        { id: "tr1", date: "2026-09-15", from: "store", to: "personal", amount: 300.00, note: "Retiro de utilidades del local" }
+      ],
+      debts: [
+        { id: "d1", account: "store", name: "Crédito Mercadería Mayorista", creditor: "Distribuidora Guayaquil", initialAmount: 1800.00, monthlyPayment: 150.00, startDate: "2026-01-10", endDate: "2026-12-10" },
+        { id: "d2", account: "personal", name: "Crédito Banco Pichincha", creditor: "Banco Pichincha", initialAmount: 2500.00, monthlyPayment: 130.00, startDate: "2026-01-10", endDate: "2027-06-10" }
+      ],
+      debtPayments: [
+        { id: "dp1", debtId: "d2", date: "2026-08-10", amount: 130.00, note: "Cuota de agosto" }
+      ]
+    };
+
+    // Variables temporales
+    let currentBatchSaleItems = [];
+    let currentBatchRestockItems = [];
+    let currentDebtFilter = 'all';
+    let excelImportStaging = [];
+    let tourStep = 1;
+
+    const tourSteps = [
+      {
+        icon: "🛍️",
+        title: "1. Separación Estricta de Cuentas",
+        content: "El dinero de tu <b>Local de Ropa</b> y tus <b>Finanzas Personales</b> se lleva en cajas separadas. Cuando gastes dinero, el sistema te preguntará siempre de cuál cuenta se pagará. Si necesitas mover dinero entre ellas, usa el botón <b>Transferir</b>.",
+        target: "tourTargetWelcome"
+      },
+      {
+        icon: "💵",
+        title: "2. Ganancia Neta y Capital Recuperado",
+        content: "En el Dashboard verás en vivo tu <b>Ganancia Limpia</b>, el <b>Capital Recuperado</b> (lo que invertiste en comprar las prendas vendidas) y cuánto tienes <b>Disponible para volver a invertir</b> en nueva mercadería.",
+        target: "tourTargetKPIs"
+      },
+      {
+        icon: "🌙",
+        title: "3. Ventas de la Noche en 1 Solo Paso",
+        content: "Para no abrir el formulario a cada rato, usa <b>'+ Pasar Ventas de la Noche'</b>. Puedes buscar prendas, definir precio y cantidad, presionar <b>'➕ Añadir a la Venta'</b> tantas veces como quieras y al final guardar todo en un solo clic.",
+        target: "navTabPos"
+      },
+      {
+        icon: "📦",
+        title: "4. Compras de Mercadería por Lote",
+        content: "Cuando vayas a comprar mercadería por mayor, usa <b>'+ Comprar / Ingresar Mercadería'</b>. Puedes elegir prendas ya existentes para sumarles stock o crear prendas nuevas sin necesidad obligatoria de ingresar tallas o colores.",
+        target: "navTabInventory"
+      },
+      {
+        icon: "💳",
+        title: "5. Control de Deudas y Respaldos",
+        content: "Lleva el control de deudas tanto de la tienda como personales. Además, recuerda usar frecuentemente <b>'Compartir Respaldo'</b> en Ajustes ⚙️ para enviarte una copia a tu WhatsApp y no perder tu información si limpias el teléfono.",
+        target: "navTabDebts"
+      }
+    ];
+
+    // Persistencia LocalStorage
+    function loadStateFromStorage() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          appState = { ...appState, ...parsed };
+          if (parsed.settings) appState.settings = { ...appState.settings, ...parsed.settings };
+          if (parsed.categories) appState.categories = { ...appState.categories, ...parsed.categories };
+        }
+      } catch (e) {
+        console.error("Error al cargar estado:", e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        refreshAllUI();
+      } catch (e) {
+        console.error("Error al guardar:", e);
+      }
+    }
+
+    // Notificaciones Toast
+    function showToast(msg, icon = '✅') {
+      const toast = document.getElementById('toastNotification');
+      if (!toast) return;
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMessage').textContent = msg;
+
+      toast.classList.remove('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(window._toastTimeout);
+      window._toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+      }, 3000);
+    }
+
+    // Cálculos Financieros
+    function calculateFinances() {
+      const totalSalesRevenue = (appState.sales || []).reduce((sum, s) => sum + Number(s.totalPaid || 0), 0);
+      const totalCostSold = (appState.sales || []).reduce((sum, s) => sum + Number(s.costTotal || 0), 0);
+      const grossProfitFromSales = (appState.sales || []).reduce((sum, s) => sum + Number(s.profitTotal || 0), 0);
+
+      const storeExpensesTotal = (appState.storeTransactions || []).filter(t => t.type === 'egreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const storeOtherIncome = (appState.storeTransactions || []).filter(t => t.type === 'ingreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+      const netProfit = (grossProfitFromSales + storeOtherIncome) - storeExpensesTotal;
+
+      const transferredToPersonal = (appState.transfers || []).filter(t => t.to === 'personal').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const transferredFromPersonal = (appState.transfers || []).filter(t => t.from === 'personal').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const transferredToStore = (appState.transfers || []).filter(t => t.to === 'store').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const transferredFromStore = (appState.transfers || []).filter(t => t.from === 'store').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+      const storeFinalBalance = (totalSalesRevenue + storeOtherIncome + transferredToStore) - (storeExpensesTotal + transferredFromStore);
+
+      const personalIncomeTotal = (appState.personalTransactions || []).filter(t => t.type === 'ingreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const personalExpenseTotal = (appState.personalTransactions || []).filter(t => t.type === 'egreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const personalFinalBalance = (personalIncomeTotal + transferredToPersonal) - (personalExpenseTotal + transferredFromPersonal);
+
+      let inventoryCostValuation = 0;
+      let totalStockUnits = 0;
+      (appState.inventory || []).forEach(p => {
+        inventoryCostValuation += (Number(p.stock || 0) * Number(p.cost || 0));
+        totalStockUnits += Number(p.stock || 0);
+      });
+
+      const reinvestmentFunds = Math.max(0, totalCostSold + netProfit);
+
+      return {
+        totalSalesRevenue,
+        recoveredCapital: totalCostSold,
+        netProfit,
+        reinvestmentFunds,
+        storeFinalBalance,
+        personalFinalBalance,
+        storeExpensesTotal,
+        personalIncomeTotal,
+        personalExpenseTotal,
+        inventoryCostValuation,
+        totalStockUnits
+      };
+    }
+
+    function calculateTotalRemainingDebt() {
+      let total = 0;
+      (appState.debts || []).forEach(d => {
+        const paid = (appState.debtPayments || []).filter(p => p.debtId === d.id).reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        total += Math.max(0, Number(d.initialAmount || 0) - paid);
+      });
+      return total;
+    }
+
+    // Actualización de toda la interfaz
+    function refreshAllUI() {
+      const f = calculateFinances();
+
+      document.getElementById('headerStoreName').textContent = appState.settings.storeName;
+      document.getElementById('headerOwnerName').textContent = appState.settings.ownerName;
+      document.getElementById('homeWelcomeOwner').textContent = appState.settings.ownerName;
+      document.getElementById('badgeStoreLabel').textContent = appState.settings.storeName;
+      document.getElementById('dashStoreTitle').textContent = appState.settings.storeName;
+
+      document.getElementById('badgeStoreBalance').textContent = `$${f.storeFinalBalance.toFixed(2)}`;
+      document.getElementById('badgePersonalBalance').textContent = `$${f.personalFinalBalance.toFixed(2)}`;
+      document.getElementById('transferCardStoreBalance').textContent = `$${f.storeFinalBalance.toFixed(2)}`;
+      document.getElementById('transferCardPersonalBalance').textContent = `$${f.personalFinalBalance.toFixed(2)}`;
+
+      document.getElementById('kpiNetProfit').textContent = `$${f.netProfit.toFixed(2)}`;
+      document.getElementById('kpiRecoveredCapital').textContent = `$${f.recoveredCapital.toFixed(2)}`;
+      document.getElementById('kpiReinvestmentFunds').textContent = `$${f.reinvestmentFunds.toFixed(2)}`;
+      document.getElementById('kpiInventoryValuation').textContent = `$${f.inventoryCostValuation.toFixed(2)}`;
+      document.getElementById('kpiTotalItemsCount').textContent = f.totalStockUnits.toLocaleString();
+
+      document.getElementById('dashStoreIncome').textContent = `$${f.totalSalesRevenue.toFixed(2)}`;
+      document.getElementById('dashStoreExpense').textContent = `$${f.storeExpensesTotal.toFixed(2)}`;
+      document.getElementById('dashStoreBalance').textContent = `$${f.storeFinalBalance.toFixed(2)}`;
+
+      document.getElementById('dashPersonalIncome').textContent = `$${f.personalIncomeTotal.toFixed(2)}`;
+      document.getElementById('dashPersonalExpense').textContent = `$${f.personalExpenseTotal.toFixed(2)}`;
+      document.getElementById('dashPersonalDebt').textContent = `$${calculateTotalRemainingDebt().toFixed(2)}`;
+
+      checkCriticalStock();
+      renderHomeRecentTransactions();
+      renderInventoryTable();
+      renderSalesTable();
+      renderStoreAccounting();
+      renderPersonalTransactions();
+      renderUnifiedDebts();
+      renderCategoriesLists();
+      renderTransfersHistory();
+      renderInvoicePreview();
+      updateCharts();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Alerta de stock crítico
+    function checkCriticalStock() {
+      const container = document.getElementById('stockCriticalAlertContainer');
+      const listEl = document.getElementById('stockCriticalList');
+      const criticals = (appState.inventory || []).filter(p => Number(p.stock) <= 2);
+
+      if (criticals.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      listEl.innerHTML = '';
+      criticals.forEach(p => {
+        const span = document.createElement('span');
+        const isZero = Number(p.stock) === 0;
+        span.className = `px-2 py-0.5 rounded-lg text-[10px] ${isZero ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-amber-100 text-amber-800'}`;
+        span.textContent = `${p.name} (${p.stock} unids)`;
+        listEl.appendChild(span);
+      });
+    }
+
+    // ==============================================================
+    // INVENTARIO & PRENDAS
+    // ==============================================================
+    function openModalNewProduct() {
+      document.getElementById('formNewProduct').reset();
+      const selCat = document.getElementById('prodCategory');
+      selCat.innerHTML = '';
+      (appState.categories.clothing || ["Hombre", "Mujer"]).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        selCat.appendChild(opt);
+      });
+      document.getElementById('modalNewProduct').classList.remove('hidden');
+    }
+
+    function saveManualProduct(e) {
+      e.preventDefault();
+      const code = document.getElementById('prodCode').value.trim() || `ROPA-${Date.now().toString().slice(-4)}`;
+      const name = document.getElementById('prodName').value.trim();
+      const category = document.getElementById('prodCategory').value;
+      const size = document.getElementById('prodSize').value.trim() || '-';
+      const color = document.getElementById('prodColor').value.trim() || '-';
+      const stock = parseInt(document.getElementById('prodStock').value) || 0;
+      const cost = parseFloat(document.getElementById('prodCost').value) || 0;
+      const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+
+      appState.inventory.push({
+        id: 'p_' + Date.now(),
+        code,
+        name,
+        category,
+        size,
+        color,
+        stock,
+        cost,
+        price
+      });
+
+      saveState();
+      closeModal('modalNewProduct');
+      showToast(`¡${name} añadida al inventario!`);
+    }
+
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = '';
+
+      const query = (document.getElementById('inventorySearchInput')?.value || '').toLowerCase();
+      const catFilter = document.getElementById('inventoryCategoryFilter')?.value || 'all';
+
+      const filtered = (appState.inventory || []).filter(p => {
+        const matchesQuery = (p.name + ' ' + (p.code || '')).toLowerCase().includes(query);
+        const matchesCat = (catFilter === 'all' || p.category === catFilter);
+        return matchesQuery && matchesCat;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-400">No se encontraron prendas con este criterio.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(p => {
+        const estProfit = Number(p.price) - Number(p.cost);
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono font-bold text-slate-600">${p.code || '-'}</td>
+          <td class="py-2.5 px-3 font-bold text-slate-900">${p.name}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[10px] font-bold">${p.category}</span></td>
+          <td class="py-2.5 px-3 text-slate-500">${p.size || '-'} / ${p.color || '-'}</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold ${p.stock <= 2 ? 'text-rose-600' : 'text-slate-900'}">${p.stock}</td>
+          <td class="py-2.5 px-3 text-right font-mono text-slate-600">$${Number(p.cost).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">$${Number(p.price).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-blue-600">+$${estProfit.toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-center">
+            <button onclick="deleteProduct('${p.id}')" class="text-slate-300 hover:text-rose-600 p-1" title="Eliminar prenda">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function deleteProduct(id) {
+      if (!confirm("¿Deseas eliminar esta prenda del inventario?")) return;
+      appState.inventory = (appState.inventory || []).filter(p => p.id !== id);
+      saveState();
+      showToast("Prenda eliminada");
+    }
+
+    // ==============================================================
+    // EXCEL / CSV IMPORT & EXPORT
+    // ==============================================================
+    function openModalImportExcel() {
+      document.getElementById('excelFileInput').value = '';
+      document.getElementById('excelPreviewSection').classList.add('hidden');
+      excelImportStaging = [];
+      document.getElementById('modalImportExcel').classList.remove('hidden');
+    }
+
+    function downloadExcelTemplate() {
+      const templateData = [
+        { "Codigo": "CAM-001", "Prenda": "Camiseta Básica Algodón", "Categoria": "Hombre", "Talla": "M", "Color": "Negro", "Cantidad": 20, "Costo": 6.50, "PVP": 15.00 },
+        { "Codigo": "JEA-002", "Prenda": "Jean Skinny Fit", "Categoria": "Mujer", "Talla": "28", "Color": "Azul", "Cantidad": 15, "Costo": 12.00, "PVP": 25.00 }
+      ];
+      const ws = XLSX.utils.json_to_sheet(templateData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Mercaderia");
+      XLSX.writeFile(wb, "Plantilla_Mercaderia_Boutique.xlsx");
+    }
+
+    function handleExcelFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet);
+
+          if (!rows || rows.length === 0) {
+            showToast("El archivo no contiene filas legibles", "⚠️");
+            return;
+          }
+
+          excelImportStaging = [];
+          rows.forEach((r, idx) => {
+            const name = r.Prenda || r.Nombre || r.Producto || r.Descripcion || r.prenda || r.nombre;
+            if (!name) return;
+
+            const code = r.Codigo || r.SKU || r.codigo || `EXCEL-${idx + 1}`;
+            const category = r.Categoria || r.categoria || 'Ropa';
+            const size = r.Talla || r.talla || '-';
+            const color = r.Color || r.color || '-';
+            const stock = parseInt(r.Cantidad || r.Stock || r.stock || 1) || 1;
+            const cost = parseFloat(r.Costo || r.costo || 0) || 0;
+            const price = parseFloat(r.PVP || r.Precio || r.precio || (cost * 1.5)) || 0;
+
+            excelImportStaging.push({
+              id: 'p_ex_' + Date.now() + '_' + idx,
+              code,
+              name,
+              category,
+              size,
+              color,
+              stock,
+              cost,
+              price
+            });
+          });
+
+          document.getElementById('excelDetectedCount').textContent = excelImportStaging.length;
+          const list = document.getElementById('excelPreviewList');
+          list.innerHTML = '';
+          excelImportStaging.slice(0, 8).forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `• ${item.name} (${item.stock} unids) - Costo: $${item.cost.toFixed(2)} | PVP: $${item.price.toFixed(2)}`;
+            list.appendChild(li);
+          });
+          if (excelImportStaging.length > 8) {
+            const li = document.createElement('li');
+            li.className = "text-purple-600 font-bold";
+            li.textContent = `...y ${excelImportStaging.length - 8} prendas más.`;
+            list.appendChild(li);
+          }
+
+          document.getElementById('excelPreviewSection').classList.remove('hidden');
+        } catch (err) {
+          console.error(err);
+          showToast("Error al procesar el archivo Excel", "❌");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function confirmExcelImport() {
+      if (excelImportStaging.length === 0) return;
+      appState.inventory = [...(appState.inventory || []), ...excelImportStaging];
+      saveState();
+      closeModal('modalImportExcel');
+      if (window.confetti) confetti({ particleCount: 60, spread: 70 });
+      showToast(`¡Se importaron ${excelImportStaging.length} prendas exitosamente!`);
+    }
+
+    // ==============================================================
+    // VENTAS EN LOTE (CARRITO RÁPIDO DE LA NOCHE)
+    // ==============================================================
+    function openModalBatchSale() {
+      currentBatchSaleItems = [];
+      document.getElementById('batchSaleDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('batchSaleClient').value = '';
+      document.getElementById('batchSearchProd').value = '';
+      filterSaleProductDropdown();
+      renderBatchSaleTable();
+      document.getElementById('modalBatchSale').classList.remove('hidden');
+    }
+
+    function filterSaleProductDropdown() {
+      const query = (document.getElementById('batchSearchProd')?.value || '').toLowerCase();
+      const sel = document.getElementById('batchSaleProductSelect');
+      sel.innerHTML = '';
+
+      const filtered = (appState.inventory || []).filter(p => {
+        return (p.name + ' ' + (p.code || '')).toLowerCase().includes(query);
+      });
+
+      if (filtered.length === 0) {
+        sel.innerHTML = `<option value="">No hay prendas coincidentes</option>`;
+        document.getElementById('batchSaleStockBadge').textContent = 'Stock: 0';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} (Stock: ${p.stock}) — $${Number(p.price).toFixed(2)}`;
+        sel.appendChild(opt);
+      });
+
+      onSelectBatchSaleProduct();
+    }
+
+    function onSelectBatchSaleProduct() {
+      const pId = document.getElementById('batchSaleProductSelect').value;
+      const prod = (appState.inventory || []).find(p => p.id === pId);
+      if (!prod) return;
+
+      document.getElementById('batchSalePrice').value = Number(prod.price).toFixed(2);
+      document.getElementById('batchSaleStockBadge').textContent = `Stock disponible: ${prod.stock} unidades | Costo: $${Number(prod.cost).toFixed(2)}`;
+    }
+
+    function addItemToBatchSale() {
+      const pId = document.getElementById('batchSaleProductSelect').value;
+      const prod = (appState.inventory || []).find(p => p.id === pId);
+      if (!prod) {
+        showToast("Selecciona una prenda válida", "⚠️");
+        return;
+      }
+
+      const qty = parseInt(document.getElementById('batchSaleQty').value) || 1;
+      const price = parseFloat(document.getElementById('batchSalePrice').value) || 0;
+
+      const alreadyInBatch = currentBatchSaleItems.filter(i => i.productId === prod.id).reduce((s, i) => s + i.qty, 0);
+      if (alreadyInBatch + qty > prod.stock) {
+        showToast(`Stock insuficiente. Solo quedan ${prod.stock - alreadyInBatch} unidades disponibles.`, "⚠️");
+        return;
+      }
+
+      currentBatchSaleItems.push({
+        tempId: 'bs_' + Date.now() + '_' + Math.random(),
+        productId: prod.id,
+        name: prod.name,
+        qty: qty,
+        unitPrice: price,
+        unitCost: Number(prod.cost)
+      });
+
+      document.getElementById('batchSaleQty').value = 1;
+      renderBatchSaleTable();
+      showToast(`¡${prod.name} añadida a la venta!`);
+    }
+
+    function removeBatchSaleItem(tempId) {
+      currentBatchSaleItems = currentBatchSaleItems.filter(i => i.tempId !== tempId);
+      renderBatchSaleTable();
+    }
+
+    function renderBatchSaleTable() {
+      const tbody = document.getElementById('batchSaleTableBody');
+      tbody.innerHTML = '';
+
+      if (currentBatchSaleItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">Aún no has añadido prendas a esta venta.</td></tr>`;
+        document.getElementById('batchItemsCount').textContent = '0';
+        document.getElementById('batchTotalPaid').textContent = '$0.00';
+        document.getElementById('batchTotalCost').textContent = '$0.00';
+        document.getElementById('batchTotalProfit').textContent = '$0.00';
+        return;
+      }
+
+      let totalPaid = 0;
+      let totalCost = 0;
+
+      currentBatchSaleItems.forEach(item => {
+        const sub = item.qty * item.unitPrice;
+        const cost = item.qty * item.unitCost;
+        totalPaid += sub;
+        totalCost += cost;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 px-2.5 text-slate-800 font-bold">${item.name}</td>
+          <td class="py-2 px-2 text-right font-mono font-bold">${item.qty}</td>
+          <td class="py-2 px-2 text-right font-mono">$${item.unitPrice.toFixed(2)}</td>
+          <td class="py-2 px-2 text-right font-mono font-bold text-slate-900">$${sub.toFixed(2)}</td>
+          <td class="py-2 px-2 text-center">
+            <button onclick="removeBatchSaleItem('${item.tempId}')" class="text-slate-300 hover:text-rose-600 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const profit = totalPaid - totalCost;
+      document.getElementById('batchItemsCount').textContent = currentBatchSaleItems.length;
+      document.getElementById('batchTotalPaid').textContent = `$${totalPaid.toFixed(2)}`;
+      document.getElementById('batchTotalCost').textContent = `$${totalCost.toFixed(2)}`;
+      document.getElementById('batchTotalProfit').textContent = `$${profit.toFixed(2)}`;
+      lucide.createIcons();
+    }
+
+    function confirmBatchSale() {
+      if (currentBatchSaleItems.length === 0) {
+        showToast("Debes añadir al menos una prenda a la venta", "⚠️");
+        return;
+      }
+
+      const date = document.getElementById('batchSaleDate').value;
+      const paymentMethod = document.getElementById('batchSalePayment').value;
+      const clientName = document.getElementById('batchSaleClient').value.trim() || 'Consumidor Final';
+
+      currentBatchSaleItems.forEach(item => {
+        const prod = (appState.inventory || []).find(p => p.id === item.productId);
+        if (prod) prod.stock -= item.qty;
+
+        const sub = item.qty * item.unitPrice;
+        const cost = item.qty * item.unitCost;
+
+        appState.sales.push({
+          id: 's_' + Date.now() + '_' + Math.random(),
+          date,
+          productId: item.productId,
+          productName: item.name,
+          clientName,
+          clientRuc: '9999999999999',
+          quantity: item.qty,
+          unitPrice: item.unitPrice,
+          totalPaid: sub,
+          costTotal: cost,
+          profitTotal: sub - cost,
+          paymentMethod
+        });
+      });
+
+      saveState();
+      closeModal('modalBatchSale');
+      if (window.confetti) confetti({ particleCount: 60, spread: 70 });
+      showToast(`¡Se procesaron ${currentBatchSaleItems.length} prendas vendidas con éxito!`);
+    }
+
+    function renderSalesTable() {
+      const tbody = document.getElementById('salesTableBody');
+      tbody.innerHTML = '';
+
+      if (!appState.sales || appState.sales.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-slate-400">No hay ventas registradas todavía.</td></tr>`;
+        return;
+      }
+
+      const list = [...appState.sales].reverse();
+      list.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-2 font-mono text-slate-500">${s.date}</td>
+          <td class="py-2.5 px-2 font-bold text-slate-800">${s.clientName || 'Consumidor Final'}</td>
+          <td class="py-2.5 px-2 font-semibold text-slate-900">${s.productName}</td>
+          <td class="py-2.5 px-2 text-right font-mono font-bold">${s.quantity}</td>
+          <td class="py-2.5 px-2 text-right font-mono">$${Number(s.unitPrice).toFixed(2)}</td>
+          <td class="py-2.5 px-2 text-right font-mono font-bold text-slate-900">$${Number(s.totalPaid).toFixed(2)}</td>
+          <td class="py-2.5 px-2 text-right font-mono font-bold text-blue-600">$${Number(s.costTotal).toFixed(2)}</td>
+          <td class="py-2.5 px-2 text-right font-mono font-bold text-emerald-600">+$${Number(s.profitTotal).toFixed(2)}</td>
+          <td class="py-2.5 px-2 text-center">
+            <button onclick="loadSaleIntoInvoice('${s.id}')" class="px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-[10px]">
+              Ver RIDE
+            </button>
+          </td>
+          <td class="py-2.5 px-2 text-right">
+            <button onclick="deleteSale('${s.id}')" class="text-slate-300 hover:text-rose-600 p-1" title="Anular venta">
+              <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function deleteSale(id) {
+      if (!confirm("¿Deseas anular esta venta? El stock será devuelto al inventario.")) return;
+      const sale = (appState.sales || []).find(s => s.id === id);
+      if (sale && sale.productId) {
+        const prod = (appState.inventory || []).find(p => p.id === sale.productId);
+        if (prod) prod.stock += Number(sale.quantity || 0);
+      }
+      appState.sales = (appState.sales || []).filter(s => s.id !== id);
+      saveState();
+      showToast("Venta anulada y stock devuelto");
+    }
+
+    // ==============================================================
+    // COMPRAS DE MERCADERÍA EN LOTE
+    // ==============================================================
+    function openModalBatchRestock() {
+      currentBatchRestockItems = [];
+      document.getElementById('batchRestockDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('batchRestockSupplier').value = '';
+      populateRestockProductSelect();
+      populateRestockCategories();
+      renderBatchRestockTable();
+      document.getElementById('modalBatchRestock').classList.remove('hidden');
+    }
+
+    function toggleRestockMode() {
+      const mode = document.querySelector('input[name="restockMode"]:checked').value;
+      const existCont = document.getElementById('restockExistingContainer');
+      const newCont = document.getElementById('restockNewContainer');
+
+      if (mode === 'existing') {
+        existCont.classList.remove('hidden');
+        newCont.classList.add('hidden');
+        onSelectRestockExistingProduct();
+      } else {
+        existCont.classList.add('hidden');
+        newCont.classList.remove('hidden');
+        document.getElementById('restockCost').value = '';
+        document.getElementById('restockPrice').value = '';
+      }
+    }
+
+    function populateRestockProductSelect() {
+      const sel = document.getElementById('restockProductSelect');
+      sel.innerHTML = '';
+      (appState.inventory || []).forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} (Stock actual: ${p.stock}) — Costo: $${Number(p.cost).toFixed(2)}`;
+        sel.appendChild(opt);
+      });
+      onSelectRestockExistingProduct();
+    }
+
+    function populateRestockCategories() {
+      const sel = document.getElementById('restockNewCategory');
+      sel.innerHTML = '';
+      (appState.categories.clothing || ["Hombre", "Mujer"]).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+    }
+
+    function onSelectRestockExistingProduct() {
+      const pId = document.getElementById('restockProductSelect').value;
+      const prod = (appState.inventory || []).find(p => p.id === pId);
+      if (!prod) return;
+      document.getElementById('restockCost').value = Number(prod.cost).toFixed(2);
+      document.getElementById('restockPrice').value = Number(prod.price).toFixed(2);
+    }
+
+    function addItemToBatchRestock() {
+      const mode = document.querySelector('input[name="restockMode"]:checked').value;
+      const qty = parseInt(document.getElementById('restockQty').value) || 1;
+      const cost = parseFloat(document.getElementById('restockCost').value) || 0;
+      const price = parseFloat(document.getElementById('restockPrice').value) || 0;
+      const sizeColor = document.getElementById('restockSizeColor').value.trim() || 'Estándar';
+
+      let name = '';
+      let prodId = null;
+      let category = 'Ropa';
+      let code = '';
+
+      if (mode === 'existing') {
+        prodId = document.getElementById('restockProductSelect').value;
+        const prod = (appState.inventory || []).find(p => p.id === prodId);
+        if (!prod) {
+          showToast("Selecciona una prenda existente válida", "⚠️");
+          return;
+        }
+        name = prod.name;
+        category = prod.category;
+        code = prod.code;
+      } else {
+        name = document.getElementById('restockNewName').value.trim();
+        if (!name) {
+          showToast("Debes escribir el nombre de la prenda nueva", "⚠️");
+          return;
+        }
+        category = document.getElementById('restockNewCategory').value;
+        code = document.getElementById('restockNewCode').value.trim() || `ROPA-${Date.now().toString().slice(-4)}`;
+      }
+
+      currentBatchRestockItems.push({
+        tempId: 'br_' + Date.now() + '_' + Math.random(),
+        mode,
+        productId: prodId,
+        name,
+        category,
+        code,
+        sizeColor,
+        qty,
+        cost,
+        price
+      });
+
+      document.getElementById('restockQty').value = 1;
+      if (mode === 'new') document.getElementById('restockNewName').value = '';
+      renderBatchRestockTable();
+      showToast(`¡${name} añadida al lote de compra!`);
+    }
+
+    function removeBatchRestockItem(tempId) {
+      currentBatchRestockItems = currentBatchRestockItems.filter(i => i.tempId !== tempId);
+      renderBatchRestockTable();
+    }
+
+    function renderBatchRestockTable() {
+      const tbody = document.getElementById('batchRestockTableBody');
+      tbody.innerHTML = '';
+
+      if (currentBatchRestockItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">Aún no has añadido prendas al lote de compra.</td></tr>`;
+        document.getElementById('batchRestockItemsCount').textContent = '0';
+        document.getElementById('batchRestockTotalInvestment').textContent = '$0.00';
+        return;
+      }
+
+      let totalInv = 0;
+      currentBatchRestockItems.forEach(item => {
+        const sub = item.qty * item.cost;
+        totalInv += sub;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 px-2.5 text-slate-800 font-bold">${item.name} <span class="text-[10px] text-slate-400 font-normal">(${item.mode === 'new' ? 'Nueva' : 'Existente'})</span></td>
+          <td class="py-2 px-2 text-right font-mono font-bold">${item.qty}</td>
+          <td class="py-2 px-2 text-right font-mono">$${item.cost.toFixed(2)}</td>
+          <td class="py-2 px-2 text-right font-mono font-bold text-purple-950">$${sub.toFixed(2)}</td>
+          <td class="py-2 px-2 text-center">
+            <button onclick="removeBatchRestockItem('${item.tempId}')" class="text-slate-300 hover:text-rose-600 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('batchRestockItemsCount').textContent = currentBatchRestockItems.length;
+      document.getElementById('batchRestockTotalInvestment').textContent = `$${totalInv.toFixed(2)}`;
+      lucide.createIcons();
+    }
+
+    function confirmBatchRestock() {
+      if (currentBatchRestockItems.length === 0) {
+        showToast("Debes añadir al menos una prenda al lote", "⚠️");
+        return;
+      }
+
+      const date = document.getElementById('batchRestockDate').value;
+      const supplier = document.getElementById('batchRestockSupplier').value.trim() || 'Compra de mercadería';
+      let totalExpense = 0;
+
+      currentBatchRestockItems.forEach(item => {
+        totalExpense += (item.qty * item.cost);
+
+        if (item.mode === 'existing' && item.productId) {
+          const prod = (appState.inventory || []).find(p => p.id === item.productId);
+          if (prod) {
+            prod.stock += item.qty;
+            prod.cost = item.cost;
+            prod.price = item.price;
+          }
+        } else {
+          appState.inventory.push({
+            id: 'p_' + Date.now() + '_' + Math.random(),
+            code: item.code,
+            name: item.name,
+            category: item.category,
+            size: item.sizeColor,
+            color: '-',
+            stock: item.qty,
+            cost: item.cost,
+            price: item.price
+          });
+        }
+      });
+
+      if (totalExpense > 0) {
+        appState.storeTransactions.push({
+          id: 'st_' + Date.now(),
+          date,
+          type: 'egreso',
+          category: 'Compra de Mercadería',
+          detail: `${supplier} (${currentBatchRestockItems.length} prendas)`,
+          amount: totalExpense
+        });
+      }
+
+      saveState();
+      closeModal('modalBatchRestock');
+      if (window.confetti) confetti({ particleCount: 50, spread: 60 });
+      showToast(`¡Mercadería ingresada exitosamente! Stock actualizado.`);
+    }
+
+    // ==============================================================
+    // GASTOS & MOVIMIENTOS UNIVERSALES
+    // ==============================================================
+    function openModalUniversalExpense(defaultChoice = 'store') {
+      document.getElementById('formUniversalExpense').reset();
+      document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+
+      const radios = document.querySelectorAll('input[name="expenseAccountChoice"]');
+      radios.forEach(r => r.checked = (r.value === defaultChoice));
+
+      updateExpenseCategoryOptions();
+      document.getElementById('modalUniversalExpense').classList.remove('hidden');
+    }
+
+    function updateExpenseCategoryOptions() {
+      const choice = document.querySelector('input[name="expenseAccountChoice"]:checked')?.value || 'store';
+      const sel = document.getElementById('expenseCategory');
+      sel.innerHTML = '';
+
+      const list = choice === 'store' ? (appState.categories.storeExpense || []) : (appState.categories.personalExpense || []);
+      list.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+    }
+
+    function saveUniversalExpense(e) {
+      e.preventDefault();
+      const choice = document.querySelector('input[name="expenseAccountChoice"]:checked').value;
+      const date = document.getElementById('expenseDate').value;
+      const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
+      const category = document.getElementById('expenseCategory').value;
+      const detail = document.getElementById('expenseDetail').value.trim();
+
+      const item = {
+        id: (choice === 'store' ? 'st_' : 'pt_') + Date.now(),
+        date,
+        type: 'egreso',
+        category,
+        detail,
+        amount
+      };
+
+      if (choice === 'store') {
+        appState.storeTransactions.push(item);
+      } else {
+        appState.personalTransactions.push(item);
+      }
+
+      saveState();
+      closeModal('modalUniversalExpense');
+      showToast("Gasto guardado exitosamente");
+    }
+
+    // ==============================================================
+    // INGRESO UNIVERSAL (LOCAL O PERSONAL)
+    // ==============================================================
+    function openModalUniversalIncome(defaultChoice = 'store') {
+      document.getElementById('formUniversalIncome').reset();
+      document.getElementById('universalIncomeDate').value = new Date().toISOString().split('T')[0];
+
+      const radios = document.querySelectorAll('input[name="incomeAccountChoice"]');
+      radios.forEach(r => r.checked = (r.value === defaultChoice));
+
+      updateIncomeCategoryOptions();
+      document.getElementById('modalUniversalIncome').classList.remove('hidden');
+    }
+
+    function updateIncomeCategoryOptions() {
+      const choice = document.querySelector('input[name="incomeAccountChoice"]:checked')?.value || 'store';
+      const sel = document.getElementById('universalIncomeCategory');
+      sel.innerHTML = '';
+
+      const list = choice === 'store' 
+        ? (appState.categories.storeIncome || ["Venta Externa", "Aporte de Capital", "Cobro Especial", "Otros Ingresos Local"])
+        : (appState.categories.personalIncome || ["Sueldo / Salario", "Comisiones", "Inversiones", "Otros Ingresos"]);
+
+      list.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        sel.appendChild(opt);
+      });
+    }
+
+    function saveUniversalIncome(e) {
+      e.preventDefault();
+      const choice = document.querySelector('input[name="incomeAccountChoice"]:checked').value;
+      const date = document.getElementById('universalIncomeDate').value;
+      const amount = parseFloat(document.getElementById('universalIncomeAmount').value) || 0;
+      const category = document.getElementById('universalIncomeCategory').value;
+      const detail = document.getElementById('universalIncomeDetail').value.trim();
+
+      const item = {
+        id: (choice === 'store' ? 'st_' : 'pt_') + Date.now(),
+        date,
+        type: 'ingreso',
+        category,
+        detail,
+        amount
+      };
+
+      if (choice === 'store') {
+        appState.storeTransactions.push(item);
+      } else {
+        appState.personalTransactions.push(item);
+      }
+
+      saveState();
+      closeModal('modalUniversalIncome');
+      showToast(`Ingreso guardado en ${choice === 'store' ? 'el Local de Ropa' : 'Personal'}`);
+    }
+
+    // ==============================================================
+    // TABLAS CONTABLES (LOCAL Y PERSONAL)
+    // ==============================================================
+    function renderStoreAccounting() {
+      const tbody = document.getElementById('storeAccountingTableBody');
+      tbody.innerHTML = '';
+
+      const month = document.getElementById('selectStoreAccountingMonth')?.value || 'all';
+
+      let periodInc = 0;
+      let periodExp = 0;
+
+      // Unificar ventas cobradas + egresos de store
+      const combined = [];
+      (appState.sales || []).forEach(s => {
+        combined.push({
+          id: s.id,
+          date: s.date,
+          type: 'ingreso',
+          category: 'Venta de Ropa',
+          detail: `Venta a ${s.clientName} (${s.quantity} unids - ${s.productName})`,
+          amount: Number(s.totalPaid),
+          isSale: true
+        });
+      });
+
+      (appState.storeTransactions || []).forEach(t => {
+        combined.push({ ...t, isSale: false });
+      });
+
+      combined.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const filtered = combined.filter(item => {
+        if (month === 'all') return true;
+        const m = parseInt(item.date.split('-')[1], 10);
+        return m === parseInt(month, 10);
+      });
+
+      filtered.forEach(item => {
+        if (item.type === 'ingreso') periodInc += Number(item.amount);
+        if (item.type === 'egreso') periodExp += Number(item.amount);
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-2 font-mono text-slate-500">${item.date}</td>
+          <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.type === 'ingreso' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${item.type.toUpperCase()}</span></td>
+          <td class="py-2.5 px-2 font-bold text-slate-700">${item.category}</td>
+          <td class="py-2.5 px-2 text-slate-600">${item.detail}</td>
+          <td class="py-2.5 px-2 text-right font-mono font-bold ${item.type === 'ingreso' ? 'text-emerald-700' : 'text-rose-700'}">${item.type === 'ingreso' ? '+' : '-'}$${Number(item.amount).toFixed(2)}</td>
+          <td class="py-2.5 px-2 text-right">
+            ${item.isSale ? '<span class="text-[10px] text-slate-400">Venta POS</span>' : `<button onclick="deleteStoreTransaction('${item.id}')" class="text-slate-300 hover:text-rose-600 p-1"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>`}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('storePeriodIncome').textContent = `$${periodInc.toFixed(2)}`;
+      document.getElementById('storePeriodExpense').textContent = `$${periodExp.toFixed(2)}`;
+      document.getElementById('storePeriodNet').textContent = `$${(periodInc - periodExp).toFixed(2)}`;
+      lucide.createIcons();
+    }
+
+    function deleteStoreTransaction(id) {
+      if (!confirm("¿Deseas eliminar este registro contable?")) return;
+      appState.storeTransactions = (appState.storeTransactions || []).filter(t => t.id !== id);
+      saveState();
+      showToast("Registro eliminado");
+    }
+
+    function renderPersonalTransactions() {
+      const tbody = document.getElementById('personalTransactionsTableBody');
+      tbody.innerHTML = '';
+
+      const month = document.getElementById('selectPersonalMonth')?.value || 'all';
+
+      const filtered = (appState.personalTransactions || []).filter(t => {
+        if (month === 'all') return true;
+        const m = parseInt(t.date.split('-')[1], 10);
+        return m === parseInt(month, 10);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No hay movimientos personales en este período.</td></tr>`;
+        return;
+      }
+
+      [...filtered].reverse().forEach(t => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-2 font-mono text-slate-500">${t.date}</td>
+          <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.type === 'ingreso' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${t.type.toUpperCase()}</span></td>
+          <td class="py-2.5 px-2 font-bold text-slate-700">${t.category}</td>
+          <td class="py-2.5 px-2 text-slate-600">${t.detail}</td>
+          <td class="py-2.5 px-2 text-right font-mono font-bold ${t.type === 'ingreso' ? 'text-emerald-700' : 'text-rose-700'}">${t.type === 'ingreso' ? '+' : '-'}$${Number(t.amount).toFixed(2)}</td>
+          <td class="py-2.5 px-2 text-right">
+            <button onclick="deletePersonalTransaction('${t.id}')" class="text-slate-300 hover:text-rose-600 p-1"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function deletePersonalTransaction(id) {
+      if (!confirm("¿Deseas eliminar este movimiento personal?")) return;
+      appState.personalTransactions = (appState.personalTransactions || []).filter(t => t.id !== id);
+      saveState();
+      showToast("Movimiento personal eliminado");
+    }
+
+    function renderHomeRecentTransactions() {
+      const tbody = document.getElementById('homeRecentTransactionsBody');
+      tbody.innerHTML = '';
+
+      const all = [];
+      (appState.sales || []).forEach(s => {
+        all.push({ date: s.date, account: '🏬 Local', type: 'Ingreso', category: 'Venta Ropa', detail: `${s.productName} (x${s.quantity})`, amount: s.totalPaid });
+      });
+      (appState.storeTransactions || []).forEach(t => {
+        all.push({ date: t.date, account: '🏬 Local', type: t.type === 'ingreso' ? 'Ingreso' : 'Egreso', category: t.category, detail: t.detail, amount: t.amount });
+      });
+      (appState.personalTransactions || []).forEach(t => {
+        all.push({ date: t.date, account: '💳 Personal', type: t.type === 'ingreso' ? 'Ingreso' : 'Egreso', category: t.category, detail: t.detail, amount: t.amount });
+      });
+
+      all.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      all.slice(0, 7).forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 px-2 font-mono text-slate-500">${r.date}</td>
+          <td class="py-2 px-2 font-bold">${r.account}</td>
+          <td class="py-2 px-2 font-bold ${r.type === 'Ingreso' ? 'text-emerald-600' : 'text-rose-600'}">${r.type}</td>
+          <td class="py-2 px-2 text-slate-600">${r.category}</td>
+          <td class="py-2 px-2 text-slate-800 font-medium">${r.detail}</td>
+          <td class="py-2 px-2 text-right font-mono font-bold ${r.type === 'Ingreso' ? 'text-emerald-700' : 'text-rose-700'}">${r.type === 'Ingreso' ? '+' : '-'}$${Number(r.amount).toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ==============================================================
+    // CONTROL DE DEUDAS UNIFICADO
+    // ==============================================================
+    function openModalDebt() {
+      document.getElementById('formDebt').reset();
+      document.getElementById('debtStart').value = new Date().toISOString().split('T')[0];
+      document.getElementById('debtEnd').value = new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0];
+      document.getElementById('modalDebt').classList.remove('hidden');
+    }
+
+    function saveUnifiedDebt(e) {
+      e.preventDefault();
+      const account = document.querySelector('input[name="debtAccountChoice"]:checked').value;
+      const debt = {
+        id: 'd_' + Date.now(),
+        account,
+        name: document.getElementById('debtName').value.trim(),
+        creditor: document.getElementById('debtName').value.trim(),
+        initialAmount: parseFloat(document.getElementById('debtInitial').value) || 0,
+        monthlyPayment: parseFloat(document.getElementById('debtQuota').value) || 0,
+        startDate: document.getElementById('debtStart').value,
+        endDate: document.getElementById('debtEnd').value
+      };
+
+      if (!appState.debts) appState.debts = [];
+      appState.debts.push(debt);
+      saveState();
+      closeModal('modalDebt');
+      showToast("Deuda registrada exitosamente");
+    }
+
+    function filterDebtsList(acc) {
+      currentDebtFilter = acc;
+      document.querySelectorAll('#btnFilterDebtAll, #btnFilterDebtStore, #btnFilterDebtPersonal').forEach(b => {
+        b.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+      });
+
+      if (acc === 'all') document.getElementById('btnFilterDebtAll').className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition";
+      if (acc === 'store') document.getElementById('btnFilterDebtStore').className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition";
+      if (acc === 'personal') document.getElementById('btnFilterDebtPersonal').className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white transition";
+
+      renderUnifiedDebts();
+    }
+
+    function renderUnifiedDebts() {
+      const container = document.getElementById('unifiedDebtsCardsContainer');
+      container.innerHTML = '';
+
+      const debts = (appState.debts || []).filter(d => {
+        if (currentDebtFilter === 'all') return true;
+        return d.account === currentDebtFilter;
+      });
+
+      if (debts.length === 0) {
+        container.innerHTML = `<div class="col-span-full p-6 text-center text-xs text-slate-400 border border-dashed rounded-2xl">No hay deudas registradas con este criterio.</div>`;
+        return;
+      }
+
+      debts.forEach(d => {
+        const payments = (appState.debtPayments || []).filter(p => p.debtId === d.id);
+        const totalPaid = payments.reduce((s, p) => s + Number(p.amount), 0);
+        const remaining = Math.max(0, Number(d.initialAmount) - totalPaid);
+        const pctPaid = Math.min(100, Math.round((totalPaid / Number(d.initialAmount)) * 100));
+        const isStore = d.account === 'store';
+
+        const card = document.createElement('div');
+        card.className = "p-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm space-y-2.5";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${isStore ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
+                ${isStore ? '🏬 Local de Ropa' : '💳 Personal'}
+              </span>
+              <h5 class="font-extrabold text-sm text-slate-900 mt-1">${d.name}</h5>
+              <span class="text-[10px] text-slate-400 block">Vence: ${d.endDate}</span>
+            </div>
+            <button onclick="deleteUnifiedDebt('${d.id}')" class="text-slate-300 hover:text-rose-500 p-1"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+          </div>
+
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-500 font-semibold">Saldo Pendiente:</span>
+              <span class="font-mono font-black text-rose-600">$${remaining.toFixed(2)}</span>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span>Monto Inicial: $${Number(d.initialAmount).toFixed(2)}</span>
+              <span>Abonado: $${totalPaid.toFixed(2)} (${pctPaid}%)</span>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+            <div class="${isStore ? 'bg-purple-600' : 'bg-blue-600'} h-full rounded-full transition-all" style="width: ${pctPaid}%"></div>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button onclick="openModalDebtPayment('${d.id}')" class="text-xs bg-white text-slate-800 font-bold px-3 py-1.5 rounded-xl border border-slate-300 shadow-sm flex items-center gap-1 active:scale-95 transition">
+              <i data-lucide="plus-circle" class="w-3 h-3 text-emerald-600"></i>
+              <span>Abonar a Deuda</span>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function deleteUnifiedDebt(id) {
+      if (!confirm("¿Deseas eliminar esta deuda y todos sus abonos?")) return;
+      appState.debts = (appState.debts || []).filter(d => d.id !== id);
+      appState.debtPayments = (appState.debtPayments || []).filter(p => p.debtId !== id);
+      saveState();
+      showToast("Deuda eliminada");
+    }
+
+    function openModalDebtPayment(preselectedId = null) {
+      document.getElementById('formDebtPayment').reset();
+      document.getElementById('debtPayDate').value = new Date().toISOString().split('T')[0];
+      const sel = document.getElementById('debtPaySelect');
+      sel.innerHTML = '';
+
+      (appState.debts || []).forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = `[${d.account === 'store' ? 'Local' : 'Personal'}] ${d.name}`;
+        if (preselectedId && d.id === preselectedId) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      document.getElementById('modalDebtPayment').classList.remove('hidden');
+    }
+
+    function saveDebtPayment(e) {
+      e.preventDefault();
+      const debtId = document.getElementById('debtPaySelect').value;
+      const amount = parseFloat(document.getElementById('debtPayAmount').value) || 0;
+      const date = document.getElementById('debtPayDate').value;
+      const note = document.getElementById('debtPayNote').value.trim() || 'Abono programado';
+
+      const pay = { id: 'dp_' + Date.now(), debtId, date, amount, note };
+      if (!appState.debtPayments) appState.debtPayments = [];
+      appState.debtPayments.push(pay);
+
+      const debt = (appState.debts || []).find(d => d.id === debtId);
+      const isStore = debt && debt.account === 'store';
+
+      if (isStore) {
+        appState.storeTransactions.push({
+          id: 'st_' + Date.now(),
+          date,
+          type: 'egreso',
+          category: 'Pago de Deuda',
+          detail: `Abono a deuda: ${debt.name} (${note})`,
+          amount
+        });
+      } else {
+        appState.personalTransactions.push({
+          id: 'pt_' + Date.now(),
+          date,
+          type: 'egreso',
+          category: 'Cuota de Deuda',
+          detail: `Abono a deuda: ${debt ? debt.name : ''} (${note})`,
+          amount
+        });
+      }
+
+      saveState();
+      closeModal('modalDebtPayment');
+      showToast("Abono registrado y descontado en contabilidad");
+    }
+
+    // ==============================================================
+    // TRANSFERENCIAS INTERCUENTAS
+    // ==============================================================
+    function openModalTransfer() {
+      document.getElementById('formTransfer').reset();
+      document.getElementById('transferDate').value = new Date().toISOString().split('T')[0];
+      updateTransferMaxNotice();
+      document.getElementById('modalTransfer').classList.remove('hidden');
+    }
+
+    function updateTransferMaxNotice() {
+      const dir = document.getElementById('transferDirection').value;
+      const f = calculateFinances();
+      const notice = document.getElementById('transferOriginNotice');
+
+      if (dir === 'store_to_personal') {
+        notice.textContent = `Saldo disponible en Local de Ropa: $${f.storeFinalBalance.toFixed(2)}`;
+      } else {
+        notice.textContent = `Saldo disponible en Personal: $${f.personalFinalBalance.toFixed(2)}`;
+      }
+    }
+
+    function executeTransfer(e) {
+      e.preventDefault();
+      const dir = document.getElementById('transferDirection').value;
+      const amount = parseFloat(document.getElementById('transferAmount').value) || 0;
+      const date = document.getElementById('transferDate').value;
+      const note = document.getElementById('transferNote').value.trim();
+
+      const f = calculateFinances();
+      const fromStore = dir === 'store_to_personal';
+
+      if (fromStore && amount > f.storeFinalBalance) {
+        showToast("Saldo insuficiente en la cuenta del Local de Ropa", "❌");
+        return;
+      }
+      if (!fromStore && amount > f.personalFinalBalance) {
+        showToast("Saldo insuficiente en la cuenta Personal", "❌");
+        return;
+      }
+
+      const tr = {
+        id: 'tr_' + Date.now(),
+        date,
+        from: fromStore ? 'store' : 'personal',
+        to: fromStore ? 'personal' : 'store',
+        amount,
+        note
+      };
+
+      appState.transfers.push(tr);
+      saveState();
+      closeModal('modalTransfer');
+      if (window.confetti) confetti({ particleCount: 50, spread: 60 });
+      showToast("Transferencia completada atómicamente");
+    }
+
+    function renderTransfersHistory() {
+      const tbody = document.getElementById('transfersHistoryTableBody');
+      tbody.innerHTML = '';
+
+      if (!appState.transfers || appState.transfers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">No se han realizado transferencias intercuentas.</td></tr>`;
+        return;
+      }
+
+      const list = [...appState.transfers].reverse();
+      list.forEach(t => {
+        const fromName = t.from === 'store' ? appState.settings.storeName : 'Personal';
+        const toName = t.to === 'store' ? appState.settings.storeName : 'Personal';
+
+        const row = document.createElement('tr');
+        row.className = "hover:bg-slate-50 transition";
+        row.innerHTML = `
+          <td class="py-2.5 px-2 font-mono text-slate-500">${t.date}</td>
+          <td class="py-2.5 px-2 font-bold text-rose-600">${fromName}</td>
+          <td class="py-2.5 px-2 font-bold text-emerald-600">${toName}</td>
+          <td class="py-2.5 px-2 text-slate-600">${t.note}</td>
+          <td class="py-2.5 px-2 text-right font-mono font-black text-slate-900">$${Number(t.amount).toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // ==============================================================
+    // ADMINISTRADOR DE CATEGORÍAS
+    // ==============================================================
+    function renderCategoriesLists() {
+      const ulStore = document.getElementById('listStoreExpenseCats');
+      if (ulStore) {
+        ulStore.innerHTML = '';
+        (appState.categories.storeExpense || []).forEach(cat => {
+          const li = document.createElement('li');
+          li.className = "flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100 font-bold text-slate-700";
+          li.innerHTML = `<span>${cat}</span> <button onclick="deleteCustomCategory('storeExpense', '${cat}')" class="text-slate-300 hover:text-rose-600 p-0.5"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`;
+          ulStore.appendChild(li);
+        });
+      }
+
+      const ulPersonal = document.getElementById('listPersonalExpenseCats');
+      if (ulPersonal) {
+        ulPersonal.innerHTML = '';
+        (appState.categories.personalExpense || []).forEach(cat => {
+          const li = document.createElement('li');
+          li.className = "flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100 font-bold text-slate-700";
+          li.innerHTML = `<span>${cat}</span> <button onclick="deleteCustomCategory('personalExpense', '${cat}')" class="text-slate-300 hover:text-rose-600 p-0.5"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`;
+          ulPersonal.appendChild(li);
+        });
+      }
+
+      const ulClothing = document.getElementById('listClothingCats');
+      if (ulClothing) {
+        ulClothing.innerHTML = '';
+        (appState.categories.clothing || []).forEach(cat => {
+          const li = document.createElement('li');
+          li.className = "flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100 font-bold text-slate-700";
+          li.innerHTML = `<span>${cat}</span> <button onclick="deleteCustomCategory('clothing', '${cat}')" class="text-slate-300 hover:text-rose-600 p-0.5"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`;
+          ulClothing.appendChild(li);
+        });
+      }
+
+      const selInvFilter = document.getElementById('inventoryCategoryFilter');
+      if (selInvFilter) {
+        const curr = selInvFilter.value;
+        selInvFilter.innerHTML = '<option value="all">Todas las Categorías</option>';
+        (appState.categories.clothing || []).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c;
+          opt.textContent = c;
+          selInvFilter.appendChild(opt);
+        });
+        selInvFilter.value = curr || 'all';
+      }
+
+      lucide.createIcons();
+    }
+
+    function addCustomCategory(group) {
+      let inputEl = null;
+      if (group === 'storeExpense') inputEl = document.getElementById('inputNewStoreExpenseCat');
+      if (group === 'personalExpense') inputEl = document.getElementById('inputNewPersonalExpenseCat');
+      if (group === 'clothing') inputEl = document.getElementById('inputNewClothingCat');
+
+      if (!inputEl) return;
+      const val = inputEl.value.trim();
+      if (!val) return;
+
+      if (!appState.categories[group]) appState.categories[group] = [];
+      if (!appState.categories[group].includes(val)) {
+        appState.categories[group].push(val);
+        inputEl.value = '';
+        saveState();
+        showToast("Categoría agregada");
+      } else {
+        showToast("Esa categoría ya existe", "⚠️");
+      }
+    }
+
+    function deleteCustomCategory(group, cat) {
+      appState.categories[group] = (appState.categories[group] || []).filter(c => c !== cat);
+      saveState();
+      showToast("Categoría eliminada");
+    }
+
+    // ==============================================================
+    // GUÍA INTERACTIVA PASO A PASO
+    // ==============================================================
+    function openModalHelpTour() {
+      tourStep = 1;
+      updateTourStepDisplay();
+      document.getElementById('modalInteractiveTour').classList.remove('hidden');
+    }
+
+    function updateTourStepDisplay() {
+      const step = tourSteps[tourStep - 1];
+      document.getElementById('tourIconStep').textContent = step.icon;
+      document.getElementById('tourTitleStep').textContent = step.title;
+      document.getElementById('tourProgressBadge').textContent = `Paso ${tourStep} de ${tourSteps.length}`;
+      document.getElementById('tourContentStep').innerHTML = step.content;
+
+      const btnPrev = document.getElementById('btnTourPrev');
+      const btnNext = document.getElementById('btnTourNext');
+
+      if (tourStep === 1) {
+        btnPrev.classList.add('hidden');
+      } else {
+        btnPrev.classList.remove('hidden');
+      }
+
+      if (tourStep === tourSteps.length) {
+        btnNext.textContent = "¡Entendido y Finalizar! 🎉";
+      } else {
+        btnNext.textContent = "Siguiente ➔";
+      }
+
+      if (step.target) {
+        const el = document.getElementById(step.target);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function nextTourStep() {
+      if (tourStep < tourSteps.length) {
+        tourStep++;
+        updateTourStepDisplay();
+      } else {
+        closeModal('modalInteractiveTour');
+        if (window.confetti) confetti({ particleCount: 50, spread: 60 });
+        showToast("¡Listo! Ya conoces todo el sistema.");
+      }
+    }
+
+    function prevTourStep() {
+      if (tourStep > 1) {
+        tourStep--;
+        updateTourStepDisplay();
+      }
+    }
+
+    // ==============================================================
+    // AJUSTES, RESPALDO Y RESET
+    // ==============================================================
+    function openModalSettings() {
+      document.getElementById('settingStoreName').value = appState.settings.storeName;
+      document.getElementById('settingOwnerName').value = appState.settings.ownerName;
+      document.getElementById('settingUserPassword').value = appState.settings.userPassword;
+      document.getElementById('settingThemeSelect').value = appState.settings.theme || 'light';
+      document.getElementById('modalSettings').classList.remove('hidden');
+    }
+
+    function saveSettings(e) {
+      e.preventDefault();
+      appState.settings.storeName = document.getElementById('settingStoreName').value.trim();
+      appState.settings.ownerName = document.getElementById('settingOwnerName').value.trim();
+      appState.settings.userPassword = document.getElementById('settingUserPassword').value.trim();
+      appState.settings.theme = document.getElementById('settingThemeSelect').value;
+      applyTheme(appState.settings.theme);
+      saveState();
+      closeModal('modalSettings');
+      showToast("Configuración guardada");
+    }
+
+    function openModalSecurityReset() {
+      document.getElementById('inputResetPassword').value = '';
+      document.getElementById('modalSecurityReset').classList.remove('hidden');
+    }
+
+    function executeTotalReset() {
+      const input = document.getElementById('inputResetPassword').value.trim();
+      const valid = appState.settings.userPassword || 'admin';
+
+      if (input !== valid && input !== MASTER_RESCUE_KEY) {
+        showToast("Contraseña incorrecta. Contacta a Jhordy al 0963923399", "❌");
+        return;
+      }
+
+      appState.inventory = [];
+      appState.sales = [];
+      appState.storeTransactions = [];
+      appState.personalTransactions = [];
+      appState.transfers = [];
+      appState.debts = [];
+      appState.debtPayments = [];
+
+      saveState();
+      closeModal('modalSecurityReset');
+      closeModal('modalSettings');
+      showToast("Todos los datos fueron borrados exitosamente", "🚨");
+    }
+
+    async function shareBackupData() {
+      const dataString = JSON.stringify(appState, null, 2);
+      const filename = `Respaldo_${appState.settings.storeName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+      const blob = new Blob([dataString], { type: 'application/json' });
+
+      if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'application/json' })] })) {
+        try {
+          const file = new File([blob], filename, { type: 'application/json' });
+          await navigator.share({
+            title: `Copia de Seguridad - ${appState.settings.storeName}`,
+            text: `Respaldo integral de ${appState.settings.storeName}`,
+            files: [file]
+          });
+          showToast("Respaldo compartido");
+          return;
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Copia descargada en tu dispositivo");
+    }
+
+    function triggerImportBackup() {
+      document.getElementById('backupFileInput').click();
+    }
+
+    function handleBackupFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.settings && imported.inventory) {
+            appState = imported;
+            saveState();
+            closeModal('modalSettings');
+            showToast("¡Respaldo restaurado exitosamente!");
+          } else {
+            showToast("Formato de respaldo no válido", "❌");
+          }
+        } catch (err) {
+          showToast("Error al leer el archivo", "❌");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ==============================================================
+    // FACTURA SRI RIDE
+    // ==============================================================
+    function renderInvoicePreview() {
+      const inv = appState.settings.invoice;
+      document.getElementById('invIssuerTradeName').textContent = inv.tradeName || appState.settings.storeName;
+      document.getElementById('invIssuerName').textContent = inv.name || appState.settings.ownerName;
+      document.getElementById('invIssuerAddress').textContent = inv.address;
+      document.getElementById('invIssuerPhone').textContent = inv.phone;
+      document.getElementById('invAccountingObliged').textContent = inv.accounting;
+      document.getElementById('invIssuerRuc').textContent = inv.ruc;
+      document.getElementById('invNumber').textContent = inv.number;
+
+      const tbody = document.getElementById('invItemsTableBody');
+      if (tbody.children.length === 0 && appState.sales && appState.sales.length > 0) {
+        loadSaleIntoInvoice(appState.sales[appState.sales.length - 1].id);
+      }
+    }
+
+    function loadSaleIntoInvoice(saleId) {
+      const sale = (appState.sales || []).find(s => s.id === saleId);
+      if (!sale) return;
+
+      document.getElementById('invClientName').textContent = sale.clientName || 'CONSUMIDOR FINAL';
+      document.getElementById('invClientRuc').textContent = sale.clientRuc || '9999999999999';
+      document.getElementById('invEmissionDate').textContent = sale.date;
+
+      const tbody = document.getElementById('invItemsTableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td class="py-2 px-3 font-mono">001</td>
+          <td class="py-2 px-3 font-mono font-bold">${sale.quantity}</td>
+          <td class="py-2 px-3 font-semibold">${sale.productName}</td>
+          <td class="py-2 px-3 text-right font-mono">$${Number(sale.unitPrice).toFixed(2)}</td>
+          <td class="py-2 px-3 text-right font-mono">$0.00</td>
+          <td class="py-2 px-3 text-right font-mono font-bold">$${Number(sale.totalPaid).toFixed(2)}</td>
+        </tr>
+      `;
+
+      const sub15 = (Number(sale.totalPaid) / 1.15).toFixed(2);
+      const iva15 = (Number(sale.totalPaid) - sub15).toFixed(2);
+
+      document.getElementById('invSubtotal15').textContent = `$${sub15}`;
+      document.getElementById('invSubtotal0').textContent = `$0.00`;
+      document.getElementById('invTaxAmount').textContent = `$${iva15}`;
+      document.getElementById('invGrandTotal').textContent = `$${Number(sale.totalPaid).toFixed(2)}`;
+
+      switchMainTab('tabInvoiceView');
+    }
+
+    function openModalInvoiceEditor() {
+      const inv = appState.settings.invoice;
+      document.getElementById('editInvRuc').value = inv.ruc;
+      document.getElementById('editInvNumber').value = inv.number;
+      document.getElementById('editInvTradeName').value = inv.tradeName;
+      document.getElementById('editInvName').value = inv.name;
+      document.getElementById('editInvAddress').value = inv.address;
+      document.getElementById('modalInvoiceEditor').classList.remove('hidden');
+    }
+
+    function saveInvoiceCustomData(e) {
+      e.preventDefault();
+      appState.settings.invoice.ruc = document.getElementById('editInvRuc').value.trim();
+      appState.settings.invoice.number = document.getElementById('editInvNumber').value.trim();
+      appState.settings.invoice.tradeName = document.getElementById('editInvTradeName').value.trim();
+      appState.settings.invoice.name = document.getElementById('editInvName').value.trim();
+      appState.settings.invoice.address = document.getElementById('editInvAddress').value.trim();
+      saveState();
+      closeModal('modalInvoiceEditor');
+      showToast("Factura SRI actualizada");
+    }
+
+    // ==============================================================
+    // GRÁFICOS CHART.JS
+    // ==============================================================
+    let chartSalesInstance = null;
+    let chartCategoryInstance = null;
+
+    function updateCharts() {
+      if (!window.Chart) return;
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+
+      const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+      const costData = new Array(12).fill(0);
+      const profitData = new Array(12).fill(0);
+
+      (appState.sales || []).forEach(s => {
+        const m = parseInt(s.date.split('-')[1], 10) - 1;
+        if (m >= 0 && m < 12) {
+          costData[m] += Number(s.costTotal || 0);
+          profitData[m] += Number(s.profitTotal || 0);
+        }
+      });
+
+      if (chartSalesInstance) chartSalesInstance.destroy();
+      const ctxS = document.getElementById('chartSalesBreakdown')?.getContext('2d');
+      if (ctxS) {
+        chartSalesInstance = new Chart(ctxS, {
+          type: 'bar',
+          data: {
+            labels: monthNames,
+            datasets: [
+              { label: 'Capital Recuperado ($)', data: costData, backgroundColor: '#3b82f6', borderRadius: 6 },
+              { label: 'Ganancia Neta ($)', data: profitData, backgroundColor: '#10b981', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: textColor }, grid: { color: gridColor } },
+              y: { ticks: { color: textColor }, grid: { color: gridColor } }
+            },
+            plugins: { legend: { labels: { color: textColor } } }
+          }
+        });
+      }
+
+      const cats = (appState.categories.clothing || ["Hombre", "Mujer", "Niños", "Calzado", "Accesorios"]);
+      const catCounts = cats.map(c => {
+        let sum = 0;
+        (appState.sales || []).forEach(s => {
+          const prod = (appState.inventory || []).find(p => p.id === s.productId);
+          if (prod && prod.category === c) sum += Number(s.totalPaid || 0);
+        });
+        return sum;
+      });
+
+      if (chartCategoryInstance) chartCategoryInstance.destroy();
+      const ctxC = document.getElementById('chartCategorySales')?.getContext('2d');
+      if (ctxC) {
+        chartCategoryInstance = new Chart(ctxC, {
+          type: 'doughnut',
+          data: {
+            labels: cats,
+            datasets: [{ data: catCounts, backgroundColor: ['#7c3aed', '#ec4899', '#f59e0b', '#3b82f6', '#10b981'] }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: textColor } } }
+          }
+        });
+      }
+    }
+
+    // ==============================================================
+    // NAVEGACIÓN Y TEMA
+    // ==============================================================
+    function switchMainTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab').forEach(b => {
+        b.classList.remove('bg-slate-800', 'text-white');
+        b.classList.add('text-slate-400');
+      });
+
+      document.querySelectorAll('.mob-tab-btn').forEach(b => {
+        b.classList.remove('text-purple-400', 'bg-slate-800/80');
+        b.classList.add('text-slate-400');
+      });
+
+      const activeSection = document.getElementById(tabId);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      const activeNavBtn = document.getElementById('nav' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+      if (activeNavBtn) {
+        activeNavBtn.classList.add('bg-slate-800', 'text-white');
+        activeNavBtn.classList.remove('text-slate-400');
+      }
+
+      const activeMobBtn = document.getElementById('mob' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+      if (activeMobBtn) {
+        activeMobBtn.classList.remove('text-slate-400');
+        activeMobBtn.classList.add('text-purple-400', 'bg-slate-800/80');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.add('hidden');
+    }
+
+    function changeGlobalYear(val) {
+      appState.settings.activeYear = val;
+      saveState();
+    }
+
+    function initTheme() {
+      const savedTheme = appState.settings?.theme || localStorage.getItem('boutique_theme') || 'light';
+      applyTheme(savedTheme, false);
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(isDark ? 'light' : 'dark', true);
+    }
+
+    function applyTheme(theme, save = true) {
+      const sunIcon = document.getElementById('iconThemeSun');
+      const moonIcon = document.getElementById('iconThemeMoon');
+
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        if (sunIcon && moonIcon) {
+          sunIcon.classList.remove('hidden');
+          moonIcon.classList.add('hidden');
+        }
+      } else {
+        document.documentElement.classList.remove('dark');
+        if (sunIcon && moonIcon) {
+          sunIcon.classList.add('hidden');
+          moonIcon.classList.remove('hidden');
+        }
+      }
+
+      appState.settings.theme = theme;
+      if (save) {
+        localStorage.setItem('boutique_theme', theme);
+        saveState();
+      }
+      if (window.Chart) updateCharts();
+    }
+
+    // Arranque de la aplicación
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStateFromStorage();
+      initTheme();
+      refreshAllUI();
+      if (window.lucide) lucide.createIcons();
+
+      if (!localStorage.getItem('boutique_onboarded_tour')) {
+        setTimeout(openModalHelpTour, 500);
+        localStorage.setItem('boutique_onboarded_tour', 'true');
+      }
+    });
+  </script>
+</body>
+</html>
