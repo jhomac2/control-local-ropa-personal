@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistema de Gestión — Local de Ropa & Finanzas Personales</title>
+  <title>Sistema de Gestión — Local de Ropa & Finanzas Personales | Tupigachi</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -160,7 +160,7 @@
       
       <!-- Logo y Nombres de Empresa y Usuario -->
       <div class="flex items-center gap-2.5 min-w-0">
-        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex-shrink-0 flex items-center justify-center font-black text-white text-base sm:text-lg shadow-sm">
+        <div id="headerStoreLogoContainer" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex-shrink-0 flex items-center justify-center font-black text-white text-base sm:text-lg shadow-sm overflow-hidden">
           🛍️
         </div>
         <div class="truncate">
@@ -173,6 +173,13 @@
           </div>
           <p class="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block">Control de Stock, Ventas, Ganancias y Finanzas Personales</p>
         </div>
+
+        <!-- Botón Respaldar en WhatsApp permanente al lado de Boutique Jhordy -->
+        <button onclick="shareBackupWhatsApp()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs shadow-md flex items-center gap-1.5 transition active:scale-95 flex-shrink-0 ml-1 sm:ml-2" title="Respaldar en WhatsApp (visible en todas las pestañas)">
+          <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">📲 Respaldar en WhatsApp</span>
+          <span class="sm:hidden">📲 Respaldo</span>
+        </button>
       </div>
 
       <!-- Balances en Vivo y Accesos Rápidos -->
@@ -230,8 +237,8 @@
     </div>
 
     <!-- Navegación de Pestañas para Escritorio -->
-    <nav class="hidden md:block bg-slate-950 border-t border-slate-800 px-3 sm:px-6">
-      <div class="max-w-7xl mx-auto flex items-center gap-1 overflow-x-auto py-1 text-xs">
+    <nav class="bg-slate-950 border-t border-slate-800 px-3 sm:px-6 overflow-x-auto">
+      <div class="max-w-7xl mx-auto flex items-center gap-1.5 py-1 text-xs min-w-max">
         <button onclick="switchMainTab('tabHome')" id="navTabHome" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-white bg-slate-800 flex items-center gap-1.5 transition whitespace-nowrap">
           <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
           <span>Dashboard & Ganancias</span>
@@ -421,7 +428,7 @@
         <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-base">
+              <div id="dashStoreLogoContainer" class="w-9 h-9 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-base overflow-hidden">
                 🏬
               </div>
               <div>
@@ -957,11 +964,13 @@
           <!-- Datos del Emisor -->
           <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <span class="text-2xl">🛍️</span>
+              <div id="invoiceLogoContainer" class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xl overflow-hidden">
+                🛍️
+              </div>
               <h2 id="invIssuerTradeName" class="text-xl font-extrabold tracking-tight text-slate-900 uppercase">BOUTIQUE JHORDY</h2>
             </div>
             <p class="text-xs text-slate-600">Razón Social: <span id="invIssuerName" class="font-bold text-slate-800">JHORDY ALEXANDER</span></p>
-            <p class="text-xs text-slate-600">Dirección Matriz: <span id="invIssuerAddress" class="font-semibold text-slate-800">Sangolquí, Pichincha, Ecuador</span></p>
+            <p class="text-xs text-slate-600">Dirección Matriz: <span id="invIssuerAddress" class="font-semibold text-slate-800">Tupigachi - Ecuador 🇪🇨</span></p>
             <p class="text-xs text-slate-600">Teléfono: <span id="invIssuerPhone" class="font-semibold text-slate-800">0963923399</span></p>
             <div class="pt-1 text-[11px] text-slate-500 space-y-0.5">
               <p>OBLIGADO A LLEVAR CONTABILIDAD: <span id="invAccountingObliged" class="font-bold text-slate-700">NO</span></p>
@@ -1012,7 +1021,7 @@
           </div>
           <div>
             <span class="text-slate-500 font-bold block">Dirección:</span>
-            <span id="invClientAddress" class="font-semibold text-slate-800">Ecuador</span>
+            <span id="invClientAddress" class="font-semibold text-slate-800">Tupigachi, Ecuador</span>
           </div>
         </div>
 
@@ -1093,34 +1102,60 @@
     </button>
   </nav>
 
-  <!-- Pie de Página Oficial con Créditos -->
+  <!-- Pie de Página Oficial con Créditos y Redes Sociales -->
   <footer class="no-print mt-auto bg-slate-950 text-slate-400 border-t border-slate-800 py-6 px-4">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
       <div>
-        <p class="text-xs text-slate-300 font-semibold flex items-center justify-center sm:justify-start gap-2">
-          <span>Diseñado por <span class="text-amber-400 font-extrabold">I´m_Jhordy</span></span>
-          <span class="text-slate-600">•</span>
-          <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-pink-400 hover:text-pink-300 font-bold transition">
-            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-            </svg>
-            <span>TikTok</span>
-          </a>
+        <p class="font-black text-slate-200">
+          Diseñado por <span class="text-purple-400">I´m_Jhordy</span>
         </p>
-        <p class="text-[11px] text-slate-500 mt-1">Almacenamiento privado en tu dispositivo. Compatible con importación Excel / Google Sheets.</p>
+        <p class="text-[11px] mt-0.5 text-slate-400">Tupigachi - Ecuador 🇪🇨</p>
       </div>
 
-      <div class="flex items-center gap-3">
-        <a href="https://wa.me/593963923399?text=Hola%20Jhordy,%20tengo%20una%20consulta%20sobre%20el%20sistema%20del%20local%20de%20ropa" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-2xl flex items-center gap-2 shadow transition active:scale-95">
+      <div class="flex items-center gap-4 text-xs font-bold flex-wrap justify-center">
+        <!-- TikTok -->
+        <a href="https://www.tiktok.com/@mr_jhordy21?_r=1&_t=ZS-9A039casma0" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-slate-300 hover:text-purple-400 transition" title="TikTok @mr_jhordy21">
+          <svg class="w-4 h-4 fill-current shrink-0 inline-block" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.81 4.48 6.3 6.3 0 0 0 1.86-4.48V8.72a8.18 8.18 0 0 0 4.92 1.63V6.9a4.85 4.85 0 0 1-1-.21z"/>
+          </svg>
+          <span>TikTok</span>
+        </a>
+
+        <!-- Facebook -->
+        <span class="flex items-center gap-1 text-slate-500 hover:text-blue-500 cursor-pointer transition" title="Facebook">
+          <svg class="w-4 h-4 fill-current shrink-0 inline-block" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          <span>Facebook</span>
+        </span>
+
+        <!-- YouTube -->
+        <span class="flex items-center gap-1 text-slate-500 hover:text-red-500 cursor-pointer transition" title="YouTube">
+          <svg class="w-4 h-4 fill-current shrink-0 inline-block" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+          <span>YouTube</span>
+        </span>
+
+        <!-- Instagram -->
+        <span class="flex items-center gap-1 text-slate-500 hover:text-pink-500 cursor-pointer transition" title="Instagram">
+          <svg class="w-4 h-4 fill-current shrink-0 inline-block" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+          <span>Instagram</span>
+        </span>
+
+        <!-- WhatsApp -->
+        <a href="https://wa.me/593963923399?text=Hola%20Jhordy,%20tengo%20una%20consulta%20sobre%20el%20sistema%20del%20local%20de%20ropa" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-emerald-400 hover:underline">
           <i data-lucide="message-circle" class="w-4 h-4"></i>
-          <span>Contacto: 0963923399</span>
+          <span>+593 963923399</span>
         </a>
       </div>
     </div>
   </footer>
 
   <!-- ============================================================== -->
-  <!-- MODALES DE CONTROL, OPERACIÓN Y CARGA DE EXCEL                -->
+  <!-- MODALES DE CONTROL, OPERACIÓN Y CARGA DE EXCEL                 -->
   <!-- ============================================================== -->
 
   <!-- Modal 1: REGISTRAR GASTO UNIVERSAL -->
@@ -1724,7 +1759,7 @@
     </div>
   </div>
 
-  <!-- MODAL: AJUSTES & RESPALDO -->
+  <!-- MODAL: AJUSTES & RESPALDO (CON LOGO Y DOBLE CONTRASEÑA) -->
   <div id="modalSettings" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200 max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1746,6 +1781,25 @@
           <input type="text" id="settingOwnerName" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
         </div>
 
+        <!-- FOTO O LOGO DEL LOCAL -->
+        <div class="p-3 bg-purple-50 rounded-2xl border border-purple-200 space-y-2">
+          <label class="block font-bold text-purple-950">Foto o Logo de la Boutique / Local</label>
+          <div class="flex items-center gap-3">
+            <div id="settingsLogoPreview" class="w-12 h-12 rounded-xl bg-white border border-purple-300 flex items-center justify-center text-xl overflow-hidden shadow-sm">
+              🛍️
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="triggerStoreLogoInput()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition">
+                Subir Foto / Logo
+              </button>
+              <button type="button" onclick="removeStoreLogo()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-1.5 px-3 rounded-xl text-xs transition">
+                Quitar
+              </button>
+              <input type="file" id="storeLogoFileInput" accept="image/*" class="hidden" onchange="handleStoreLogoFile(event)">
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">Tema Visual</label>
@@ -1756,7 +1810,7 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Contraseña Personal</label>
-            <input type="text" id="settingUserPassword" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+            <input type="password" id="settingUserPassword" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold" placeholder="Tu clave secreta">
           </div>
         </div>
 
@@ -1769,23 +1823,29 @@
 
       <!-- Respaldos -->
       <div class="pt-3 border-t border-slate-100 space-y-2 text-xs">
-        <span class="font-black text-slate-800 block">Copias de Seguridad (Privadas en tu Móvil)</span>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="shareBackupData()" class="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-100 transition">
+        <span class="font-black text-slate-800 block">💾 Copias de Seguridad y Respaldos</span>
+        <p class="text-[11px] text-slate-500 leading-tight">
+          Tus datos se guardan de forma 100% privada en tu dispositivo. Comparte periódicamente tu respaldo a WhatsApp o descarga tu archivo.
+        </p>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="shareBackupData()" class="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-100 transition text-[11px]">
             <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-            <span>Compartir Respaldo</span>
+            <span>WhatsApp</span>
           </button>
-          <button onclick="triggerImportBackup()" class="p-2.5 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 font-bold flex items-center justify-center gap-1.5 hover:bg-blue-100 transition">
+          <button onclick="downloadJsonBackup()" class="p-2.5 rounded-xl bg-purple-50 text-purple-800 border border-purple-200 font-bold flex items-center justify-center gap-1.5 hover:bg-purple-100 transition text-[11px]">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Descargar</span>
+          </button>
+          <button onclick="openModalRestoreBackup()" class="p-2.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-300 font-black flex items-center justify-center gap-1.5 hover:bg-amber-100 transition text-[11px]">
             <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-            <span>Restaurar Copia</span>
+            <span>Cargar Copia</span>
           </button>
-          <input type="file" id="backupFileInput" accept=".json" class="hidden" onchange="handleBackupFile(event)">
         </div>
       </div>
 
       <!-- Zona de Peligro -->
       <div class="pt-3 border-t border-slate-100 space-y-2">
-        <span class="font-black text-rose-700 block text-xs">Zona de Seguridad</span>
+        <span class="font-black text-rose-700 block text-xs">⚠️ Zona de Peligro & Reinicio Total</span>
         <button onclick="openModalSecurityReset()" class="w-full py-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-bold text-xs rounded-xl transition">
           🚨 Borrar Todos los Datos / Resetear Sistema
         </button>
@@ -1793,7 +1853,46 @@
     </div>
   </div>
 
-  <!-- MODAL: CONFIRMAR BORRADO DE SEGURIDAD -->
+  <!-- MODAL: RESTAURAR COPIA DE SEGURIDAD (ARCHIVO O PEGAR TEXTO) -->
+  <div id="modalRestoreBackup" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200 text-xs">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h4 class="font-black text-slate-900 text-sm flex items-center gap-2">
+          <span>📥</span>
+          <span>Cargar / Restaurar Copia de Seguridad</span>
+        </h4>
+        <button onclick="closeModal('modalRestoreBackup')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-3.5">
+        <!-- Opción 1: Subir Archivo -->
+        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <span class="font-bold text-slate-800 block">Opción 1: Seleccionar archivo desde tu dispositivo</span>
+          <button onclick="triggerImportBackup()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition">
+            <i data-lucide="folder-open" class="w-4 h-4"></i>
+            <span>Buscar archivo de respaldo (.json)</span>
+          </button>
+          <input type="file" id="backupFileInput" accept=".json,application/json,text/plain,*/*" class="hidden" onchange="handleBackupFile(event)">
+        </div>
+
+        <!-- Opción 2: Pegar Texto -->
+        <div class="space-y-1.5">
+          <span class="font-bold text-slate-800 block">Opción 2: O pega aquí el código / JSON copiado</span>
+          <textarea id="restoreRawTextInput" rows="4" placeholder="Pega aquí el código o contenido copiado de tu respaldo..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 outline-none resize-none"></textarea>
+          <button onclick="restoreFromRawText()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Restaurar desde Texto Pegado</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-1">
+        <button onclick="closeModal('modalRestoreBackup')" class="px-4 py-2 font-bold text-slate-500">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAR BORRADO DE SEGURIDAD (CON ASISTENCIA WHATSAPP) -->
   <div id="modalSecurityReset" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-3 border border-slate-200 text-xs">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
@@ -1803,14 +1902,27 @@
         </h4>
         <button onclick="closeModal('modalSecurityReset')" class="text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
-      <p class="text-slate-600">Ingresa tu contraseña personal o la clave maestra para vaciar todo el sistema:</p>
-      <input type="password" id="inputResetPassword" placeholder="Contraseña de seguridad..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-sm">
-      <div class="p-2 bg-slate-50 rounded-xl text-[11px] text-slate-500">
-        ¿Olvidaste tu contraseña? Comunícate con Jhordy al <b>0963923399</b> para tu clave de rescate.
+      <p class="text-slate-600">Ingresa tu contraseña personal o la clave maestra oficial de rescate:</p>
+      <input type="password" id="inputResetPassword" placeholder="Escribe tu contraseña..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-sm">
+      
+      <!-- Asistencia si olvidó la contraseña -->
+      <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 space-y-1">
+        <p class="font-bold flex items-center gap-1">
+          <span>❓</span>
+          <span>¿Olvidaste tu contraseña?</span>
+        </p>
+        <p class="text-slate-600 leading-tight">
+          Comunícate directamente con <b>Jhordy</b> al celular <b>0963923399</b> para solicitar la clave maestra de rescate.
+        </p>
+        <a href="https://wa.me/593963923399?text=Hola%20Jhordy,%20olvide%20mi%20clave%20en%20el%20sistema%20del%20local%20de%20ropa%20y%20necesito%20la%20clave%20de%20rescate" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold text-emerald-700 hover:underline pt-0.5">
+          <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+          <span>Pedir clave de rescate a Jhordy por WhatsApp</span>
+        </a>
       </div>
+
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="closeModal('modalSecurityReset')" class="px-3 py-2 font-bold text-slate-500">Cancelar</button>
-        <button onclick="executeTotalReset()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-black rounded-xl">Borrar Todo</button>
+        <button onclick="executeTotalReset()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-black rounded-xl shadow">Borrar Todo</button>
       </div>
     </div>
   </div>
@@ -1840,7 +1952,7 @@
           <input type="text" id="editInvName" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold">
         </div>
         <div>
-          <label class="block font-bold text-slate-700">Dirección</label>
+          <label class="block font-bold text-slate-700">Dirección Matriz</label>
           <input type="text" id="editInvAddress" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold">
         </div>
         <div class="pt-2 flex justify-end gap-2">
@@ -1894,15 +2006,16 @@
       settings: {
         storeName: "BOUTIQUE JHORDY",
         ownerName: "Jhordy",
-        userPassword: "admin",
+        userPassword: "123",
         activeYear: "2026",
         theme: "light",
+        storeLogo: "",
         invoice: {
           ruc: "1726392339001",
           number: "001-001-000000210",
           tradeName: "BOUTIQUE JHORDY",
           name: "JHORDY ALEXANDER",
-          address: "Sangolquí - Pichincha, Ecuador",
+          address: "Tupigachi - Ecuador 🇪🇨",
           phone: "0963923399",
           accounting: "NO"
         }
@@ -1966,13 +2079,13 @@
       {
         icon: "🌙",
         title: "3. Ventas de la Noche en 1 Solo Paso",
-        content: "Para no abrir el formulario a cada rato, usa <b>'+ Pasar Ventas de la Noche'</b>. Puedes buscar prendas, definir precio y cantidad, presionar <b>'➕ Añadir a la Venta'</b> tantas veces como quieras y al final guardar todo en un solo clic.",
+        content: "Para no abrir el formulario a cada rato, usa <b>'+ Añadir Venta'</b>. Puedes buscar prendas, definir precio y cantidad, presionar <b>'➕ Añadir a la Venta'</b> tantas veces como quieras y al final guardar todo en un solo clic.",
         target: "navTabPos"
       },
       {
         icon: "📦",
         title: "4. Compras de Mercadería por Lote",
-        content: "Cuando vayas a comprar mercadería por mayor, usa <b>'+ Comprar / Ingresar Mercadería'</b>. Puedes elegir prendas ya existentes para sumarles stock o crear prendas nuevas sin necesidad obligatoria de ingresar tallas o colores.",
+        content: "Cuando vayas a comprar mercadería por mayor, usa <b>'+ Ingresar Mercadería'</b>. Puedes elegir prendas ya existentes para sumarles stock o crear prendas nuevas sin necesidad obligatoria de ingresar tallas o colores.",
         target: "navTabInventory"
       },
       {
@@ -2079,6 +2192,48 @@
       return total;
     }
 
+    // Manejo y Renderizado del Logo Personalizado
+    function triggerStoreLogoInput() {
+      const input = document.getElementById('storeLogoFileInput');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    }
+
+    function handleStoreLogoFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast("Selecciona un archivo de imagen válido", "⚠️");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        appState.settings.storeLogo = e.target.result;
+        saveState();
+        showToast("¡Logo del local actualizado correctamente!", "📸");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeStoreLogo() {
+      appState.settings.storeLogo = "";
+      saveState();
+      showToast("Se restableció el icono estándar (🛍️)", "ℹ️");
+    }
+
+    function renderStoreLogos() {
+      const hasLogo = Boolean(appState.settings && appState.settings.storeLogo);
+      const imgHtml = hasLogo ? `<img src="${appState.settings.storeLogo}" alt="Logo" class="w-full h-full object-cover">` : '🛍️';
+      
+      const elements = ['headerStoreLogoContainer', 'dashStoreLogoContainer', 'invoiceLogoContainer', 'settingsLogoPreview'];
+      elements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = imgHtml;
+      });
+    }
+
     // Actualización de toda la interfaz
     function refreshAllUI() {
       const f = calculateFinances();
@@ -2108,6 +2263,7 @@
       document.getElementById('dashPersonalExpense').textContent = `$${f.personalExpenseTotal.toFixed(2)}`;
       document.getElementById('dashPersonalDebt').textContent = `$${calculateTotalRemainingDebt().toFixed(2)}`;
 
+      renderStoreLogos();
       checkCriticalStock();
       renderHomeRecentTransactions();
       renderInventoryTable();
@@ -2231,10 +2387,9 @@
     }
 
     function deleteProduct(id) {
-      if (!confirm("¿Deseas eliminar esta prenda del inventario?")) return;
       appState.inventory = (appState.inventory || []).filter(p => p.id !== id);
       saveState();
-      showToast("Prenda eliminada");
+      showToast("Prenda eliminada del inventario");
     }
 
     // ==============================================================
@@ -2538,7 +2693,6 @@
     }
 
     function deleteSale(id) {
-      if (!confirm("¿Deseas anular esta venta? El stock será devuelto al inventario.")) return;
       const sale = (appState.sales || []).find(s => s.id === id);
       if (sale && sale.productId) {
         const prod = (appState.inventory || []).find(p => p.id === sale.productId);
@@ -2546,7 +2700,7 @@
       }
       appState.sales = (appState.sales || []).filter(s => s.id !== id);
       saveState();
-      showToast("Venta anulada y stock devuelto");
+      showToast("Venta anulada y stock devuelto al inventario");
     }
 
     // ==============================================================
@@ -2879,7 +3033,6 @@
       let periodInc = 0;
       let periodExp = 0;
 
-      // Unificar ventas cobradas + egresos de store
       const combined = [];
       (appState.sales || []).forEach(s => {
         combined.push({
@@ -2931,10 +3084,9 @@
     }
 
     function deleteStoreTransaction(id) {
-      if (!confirm("¿Deseas eliminar este registro contable?")) return;
       appState.storeTransactions = (appState.storeTransactions || []).filter(t => t.id !== id);
       saveState();
-      showToast("Registro eliminado");
+      showToast("Registro contable eliminado");
     }
 
     function renderPersonalTransactions() {
@@ -2973,7 +3125,6 @@
     }
 
     function deletePersonalTransaction(id) {
-      if (!confirm("¿Deseas eliminar este movimiento personal?")) return;
       appState.personalTransactions = (appState.personalTransactions || []).filter(t => t.id !== id);
       saveState();
       showToast("Movimiento personal eliminado");
@@ -3117,11 +3268,10 @@
     }
 
     function deleteUnifiedDebt(id) {
-      if (!confirm("¿Deseas eliminar esta deuda y todos sus abonos?")) return;
       appState.debts = (appState.debts || []).filter(d => d.id !== id);
       appState.debtPayments = (appState.debtPayments || []).filter(p => p.debtId !== id);
       saveState();
-      showToast("Deuda eliminada");
+      showToast("Deuda y abonos eliminados");
     }
 
     function openModalDebtPayment(preselectedId = null) {
@@ -3405,8 +3555,9 @@
     function openModalSettings() {
       document.getElementById('settingStoreName').value = appState.settings.storeName;
       document.getElementById('settingOwnerName').value = appState.settings.ownerName;
-      document.getElementById('settingUserPassword').value = appState.settings.userPassword;
+      document.getElementById('settingUserPassword').value = appState.settings.userPassword || "123";
       document.getElementById('settingThemeSelect').value = appState.settings.theme || 'light';
+      renderStoreLogos();
       document.getElementById('modalSettings').classList.remove('hidden');
     }
 
@@ -3429,7 +3580,7 @@
 
     function executeTotalReset() {
       const input = document.getElementById('inputResetPassword').value.trim();
-      const valid = appState.settings.userPassword || 'admin';
+      const valid = appState.settings.userPassword || '123';
 
       if (input !== valid && input !== MASTER_RESCUE_KEY) {
         showToast("Contraseña incorrecta. Contacta a Jhordy al 0963923399", "❌");
@@ -3448,6 +3599,28 @@
       closeModal('modalSecurityReset');
       closeModal('modalSettings');
       showToast("Todos los datos fueron borrados exitosamente", "🚨");
+    }
+
+    function shareBackupWhatsApp() {
+      const f = calculateFinances();
+      const summary = `*RESPALDO - ${appState.settings.storeName}*\nFecha: ${new Date().toLocaleDateString()}\nPropietario: ${appState.settings.ownerName}\nSaldo Local: $${f.storeFinalBalance.toFixed(2)}\nSaldo Personal: $${f.personalFinalBalance.toFixed(2)}\nPrendas en Stock: ${f.totalStockUnits}`;
+      const url = `https://wa.me/593963923399?text=${encodeURIComponent(summary)}`;
+      window.open(url, '_blank');
+    }
+
+    function downloadJsonBackup() {
+      const dataString = JSON.stringify(appState, null, 2);
+      const filename = `Respaldo_${appState.settings.storeName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+      const blob = new Blob([dataString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Copia de seguridad descargada en tu dispositivo", "💾");
     }
 
     async function shareBackupData() {
@@ -3469,20 +3642,20 @@
           console.log(e);
         }
       }
+      shareBackupWhatsApp();
+    }
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast("Copia descargada en tu dispositivo");
+    function openModalRestoreBackup() {
+      document.getElementById('restoreRawTextInput').value = '';
+      document.getElementById('modalRestoreBackup').classList.remove('hidden');
     }
 
     function triggerImportBackup() {
-      document.getElementById('backupFileInput').click();
+      const input = document.getElementById('backupFileInput');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
     }
 
     function handleBackupFile(event) {
@@ -3491,21 +3664,36 @@
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (imported.settings && imported.inventory) {
-            appState = imported;
-            saveState();
-            closeModal('modalSettings');
-            showToast("¡Respaldo restaurado exitosamente!");
-          } else {
-            showToast("Formato de respaldo no válido", "❌");
-          }
-        } catch (err) {
-          showToast("Error al leer el archivo", "❌");
-        }
+        processRestoredJson(e.target.result);
       };
       reader.readAsText(file);
+    }
+
+    function restoreFromRawText() {
+      const raw = document.getElementById('restoreRawTextInput').value.trim();
+      if (!raw) {
+        showToast("Pega el código o JSON de respaldo", "⚠️");
+        return;
+      }
+      processRestoredJson(raw);
+    }
+
+    function processRestoredJson(jsonString) {
+      try {
+        const imported = JSON.parse(jsonString);
+        if (imported && (imported.inventory || imported.sales || imported.settings || imported.storeTransactions)) {
+          appState = { ...appState, ...imported };
+          saveState();
+          closeModal('modalRestoreBackup');
+          closeModal('modalSettings');
+          if (window.confetti) confetti({ particleCount: 70, spread: 60 });
+          showToast("¡Copia de seguridad restaurada con éxito!", "✅");
+        } else {
+          showToast("El formato del archivo no es válido", "❌");
+        }
+      } catch (err) {
+        showToast("Error al leer el archivo o código JSON", "❌");
+      }
     }
 
     // ==============================================================
@@ -3515,7 +3703,7 @@
       const inv = appState.settings.invoice;
       document.getElementById('invIssuerTradeName').textContent = inv.tradeName || appState.settings.storeName;
       document.getElementById('invIssuerName').textContent = inv.name || appState.settings.ownerName;
-      document.getElementById('invIssuerAddress').textContent = inv.address;
+      document.getElementById('invIssuerAddress').textContent = inv.address || "Tupigachi - Ecuador 🇪🇨";
       document.getElementById('invIssuerPhone').textContent = inv.phone;
       document.getElementById('invAccountingObliged').textContent = inv.accounting;
       document.getElementById('invIssuerRuc').textContent = inv.ruc;
@@ -3564,7 +3752,7 @@
       document.getElementById('editInvNumber').value = inv.number;
       document.getElementById('editInvTradeName').value = inv.tradeName;
       document.getElementById('editInvName').value = inv.name;
-      document.getElementById('editInvAddress').value = inv.address;
+      document.getElementById('editInvAddress').value = inv.address || "Tupigachi - Ecuador 🇪🇨";
       document.getElementById('modalInvoiceEditor').classList.remove('hidden');
     }
 
