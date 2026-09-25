@@ -27,18 +27,21 @@
     }
   </script>
 
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Canvas Confetti -->
+  <!-- Canvas Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <!-- SheetJS (XLSX / CSV parser) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
-    
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       -webkit-tap-highlight-color: transparent;
@@ -48,7 +51,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Adaptación de Modo Oscuro */
+    /* Adaptación a Modo Oscuro */
     html.dark body {
       background-color: #020617 !important;
       color: #f8fafc !important;
@@ -91,7 +94,7 @@
       border-color: #334155 !important;
     }
 
-    /* Formato RIDE SRI Factura */
+    /* Formato RIDE SRI Factura para Impresión */
     #printableInvoiceArea {
       background-color: #ffffff !important;
       color: #0f172a !important;
@@ -144,9 +147,9 @@
     }
   </style>
 </head>
+
 <body class="min-h-full flex flex-col antialiased selection:bg-purple-600 selection:text-white pb-24 md:pb-0">
 
-  <!-- Toast de Notificaciones -->
   <div id="toastNotification" class="fixed top-4 right-4 z-50 transform transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
     <div class="bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-bold">
       <span id="toastIcon" class="text-base">✅</span>
@@ -154,15 +157,17 @@
     </div>
   </div>
 
-  <!-- Encabezado Superior -->
   <header class="no-print bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
       
-      <!-- Logo y Nombres de Empresa y Usuario -->
+      <!-- Logo, Nombre del Local y Botón de Respaldo WhatsApp Permanente -->
       <div class="flex items-center gap-2.5 min-w-0">
-        <div id="headerStoreLogoContainer" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex-shrink-0 flex items-center justify-center font-black text-white text-base sm:text-lg shadow-sm overflow-hidden">
-          🛍️
+        <!-- Logo o Icono de Boutique -->
+        <div id="headerLogoContainer" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex-shrink-0 flex items-center justify-center font-black text-white text-base sm:text-lg shadow-sm overflow-hidden border border-purple-400/30">
+          <span id="headerLogoDefault">🛍️</span>
+          <img id="headerLogoImg" src="" alt="Logo" class="w-full h-full object-cover hidden">
         </div>
+        
         <div class="truncate">
           <div class="flex items-center gap-1.5 truncate">
             <h1 class="font-extrabold text-xs sm:text-base tracking-tight text-white flex items-center gap-1 truncate">
@@ -171,18 +176,16 @@
               <span id="headerOwnerName" class="text-[11px] sm:text-xs text-purple-300 font-semibold truncate">Jhordy</span>
             </h1>
           </div>
-          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block">Control de Stock, Ventas, Ganancias y Finanzas Personales</p>
+          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block">Control de Stock, Ventas, Ganancias & Finanzas</p>
         </div>
 
-        <!-- Botón Respaldar en WhatsApp permanente al lado de Boutique Jhordy -->
-        <button onclick="shareBackupWhatsApp()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs shadow-md flex items-center gap-1.5 transition active:scale-95 flex-shrink-0 ml-1 sm:ml-2" title="Respaldar en WhatsApp (visible en todas las pestañas)">
+        <!-- BOTÓN FIJO DE RESPALDO A WHATSAPP (SIEMPRE VISIBLE EN TODAS LAS PÁGINAS) -->
+        <button onclick="shareBackupDataWhatsApp()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 sm:px-3 py-1.5 rounded-xl shadow transition active:scale-95 flex items-center gap-1.5 flex-shrink-0 text-xs ml-1" title="Compartir copia de seguridad directamente a tu WhatsApp">
           <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">📲 Respaldar en WhatsApp</span>
-          <span class="sm:hidden">📲 Respaldo</span>
+          <span class="text-[11px] font-bold">📲 Respaldar en WhatsApp</span>
         </button>
       </div>
 
-      <!-- Balances en Vivo y Accesos Rápidos -->
       <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
         <!-- Selector Global de Año -->
         <div class="flex items-center bg-slate-800/90 border border-slate-700 rounded-xl px-2 py-1 text-[11px] sm:text-xs">
@@ -193,7 +196,7 @@
           </select>
         </div>
 
-        <!-- Badge Saldo Personal -->
+        <!-- Saldo Personal -->
         <div class="flex items-center gap-1.5 bg-blue-950/80 border border-blue-500/30 px-2 sm:px-3 py-1 rounded-xl text-xs cursor-pointer hover:bg-blue-900/60 transition" onclick="switchMainTab('tabPersonal')" title="Ver Finanzas Personales">
           <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
           <div>
@@ -202,7 +205,7 @@
           </div>
         </div>
 
-        <!-- Badge Saldo Local de Ropa -->
+        <!-- Saldo Local de Ropa -->
         <div class="flex items-center gap-1.5 bg-purple-950/80 border border-purple-500/30 px-2 sm:px-3 py-1 rounded-xl text-xs cursor-pointer hover:bg-purple-900/60 transition" onclick="switchMainTab('tabStore')" title="Ver Negocio de Ropa">
           <div class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></div>
           <div>
@@ -210,6 +213,11 @@
             <span id="badgeStoreBalance" class="font-mono font-bold text-white text-[11px] sm:text-sm">$0.00</span>
           </div>
         </div>
+
+        <!-- Botón Notificaciones Reales -->
+        <button onclick="toggleSystemNotificationPermission()" id="btnHeaderNotification" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Activar/Desactivar Notificaciones">
+          <i data-lucide="bell" id="headerBellIcon" class="w-3.5 h-3.5 text-slate-400"></i>
+        </button>
 
         <!-- Botón Rápido de Transferencia -->
         <button onclick="openModalTransfer()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs shadow transition active:scale-95 flex items-center gap-1" title="Transferir dinero entre Local y Personal">
@@ -236,9 +244,8 @@
 
     </div>
 
-    <!-- Navegación de Pestañas para Escritorio -->
-    <nav class="bg-slate-950 border-t border-slate-800 px-3 sm:px-6 overflow-x-auto">
-      <div class="max-w-7xl mx-auto flex items-center gap-1.5 py-1 text-xs min-w-max">
+    <nav class="hidden md:block bg-slate-950 border-t border-slate-800 px-3 sm:px-6">
+      <div class="max-w-7xl mx-auto flex items-center gap-1 overflow-x-auto py-1 text-xs">
         <button onclick="switchMainTab('tabHome')" id="navTabHome" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-white bg-slate-800 flex items-center gap-1.5 transition whitespace-nowrap">
           <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
           <span>Dashboard & Ganancias</span>
@@ -290,7 +297,7 @@
   <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
 
     <!-- ============================================================== -->
-    <!-- TAB 1: INICIO & DASHBOARD (GANANCIA, CAPITAL RECUPERADO, REINVERSIÓN) -->
+    <!-- TAB 1: INICIO & DASHBOARD                                       -->
     <!-- ============================================================== -->
     <section id="tabHome" class="tab-content space-y-6">
       
@@ -299,13 +306,13 @@
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
-              <span>●</span> Sistema Central de Gestión Comercial & Personal
+              <span>●</span> Sistema Central de Gestión Comercial & Personal | Tupigachi
             </span>
             <h2 class="text-xl sm:text-2xl font-black text-white mt-1">
               Bienvenido, <span id="homeWelcomeOwner" class="text-purple-300">Jhordy</span>
             </h2>
             <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
-              Control transparente de <b>Ganancia Neta</b>, <b>Capital Recuperado</b> y <b>Fondos para Reinversión en Mercadería</b> con separación contable estricta.
+              Control transparente de <b>Ganancia Neta</b>, <b>Capital Recuperado</b> y <b>Fondos para Reinversión</b> con separación contable estricta.
             </p>
           </div>
 
@@ -339,7 +346,6 @@
         </div>
       </div>
 
-      <!-- TARJETAS PRINCIPALES DEL NEGOCIO (KPIS CLAVE) -->
       <div id="tourTargetKPIs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <!-- 1. GANANCIA TOTAL -->
@@ -366,7 +372,7 @@
           <p class="text-[11px] text-slate-500 mt-1">Costo de mercadería vendida devuelta a caja</p>
         </div>
 
-        <!-- 3. CUÁNTO PUEDO VOLVER A INVERTIR -->
+        <!-- 3. DISPONIBLE PARA REINVERTIR -->
         <div class="bg-gradient-to-br from-purple-900 to-indigo-950 text-white rounded-3xl p-5 border border-purple-700/50 shadow-lg relative overflow-hidden">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase tracking-wider text-amber-300">Disponible para Reinvertir</span>
@@ -378,7 +384,7 @@
           <p class="text-[11px] text-purple-200 mt-1">Ganancias netas acumuladas + Capital recuperado</p>
         </div>
 
-        <!-- 4. VALOR DEL STOCK ACTUAL EN BODEGA / TIENDA -->
+        <!-- 4. VALOR DEL STOCK ACTUAL -->
         <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Valor Inventario Actual</span>
@@ -421,19 +427,19 @@
 
       </div>
 
-      <!-- Resumen Dual: Local de Ropa vs Finanzas Personales -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- Tarjeta Resumen Local de Ropa -->
         <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-              <div id="dashStoreLogoContainer" class="w-9 h-9 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-base overflow-hidden">
-                🏬
+              <div class="w-9 h-9 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-base overflow-hidden border border-purple-200">
+                <span id="dashStoreCardEmoji">🏬</span>
+                <img id="dashStoreCardLogoImg" src="" alt="Logo" class="w-full h-full object-cover hidden">
               </div>
               <div>
                 <h4 class="font-black text-sm text-slate-900" id="dashStoreTitle">Local de Ropa</h4>
-                <span class="text-xs text-slate-400">Ventas, compras, arriendo y flujo de tienda</span>
+                <span class="text-xs text-slate-400">Ventas, compras, arriendo y caja comercial</span>
               </div>
             </div>
             <button onclick="switchMainTab('tabStore')" class="text-xs font-bold text-purple-600 hover:text-purple-700 bg-purple-50 px-3 py-1.5 rounded-xl">
@@ -522,11 +528,10 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- TAB 2: INVENTARIO DE MERCADERÍA (MANUAL & EXCEL)               -->
+    <!-- TAB 2: INVENTARIO DE MERCADERÍA                                 -->
     <!-- ============================================================== -->
     <section id="tabInventory" class="tab-content hidden space-y-6">
 
-      <!-- Encabezado de Inventario -->
       <div class="bg-slate-900 text-white p-5 rounded-3xl shadow-lg border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span class="text-[10px] uppercase font-bold tracking-wider text-purple-400">Gestión de Stock & Prendas</span>
@@ -601,8 +606,8 @@
       <div class="bg-emerald-900 text-white p-5 rounded-3xl shadow-lg border border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-300">Punto de Venta Agrupado</span>
-          <h2 class="text-xl sm:text-2xl font-black">Ventas de la Noche & Mostrador</h2>
-          <p class="text-xs text-emerald-200 mt-0.5">Añade todas las prendas vendidas en un solo lote y confírmalas todas en bloque.</p>
+          <h2 class="text-xl sm:text-2xl font-black">Ventas de Mostrador & Noche</h2>
+          <p class="text-xs text-emerald-200 mt-0.5">Añade todas las prendas vendidas en un solo lote y confírmalas en bloque.</p>
         </div>
 
         <button onclick="openModalBatchSale()" class="bg-white text-emerald-950 hover:bg-emerald-50 font-black px-4 py-2.5 rounded-2xl text-xs shadow transition active:scale-95 flex items-center gap-1.5">
@@ -791,7 +796,7 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- TAB: CONTROL UNIFICADO DE DEUDAS (LOCAL O PERSONAL)           -->
+    <!-- TAB 6: CONTROL DE DEUDAS (SIN NOTIFICACIONES MOLESTAS)          -->
     <!-- ============================================================== -->
     <section id="tabDebts" class="tab-content hidden space-y-6">
 
@@ -827,7 +832,7 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- TAB: ADMINISTRADOR DE CATEGORÍAS                              -->
+    <!-- TAB 7: ADMINISTRADOR DE CATEGORÍAS                             -->
     <!-- ============================================================== -->
     <section id="tabCategories" class="tab-content hidden space-y-6">
 
@@ -882,7 +887,7 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- TAB 6: TRANSFERENCIAS INTERCUENTAS                             -->
+    <!-- TAB 8: TRANSFERENCIAS INTERCUENTAS                             -->
     <!-- ============================================================== -->
     <section id="tabTransfers" class="tab-content hidden space-y-6">
 
@@ -933,7 +938,7 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- TAB 7: FACTURA FORMAL SRI ECUADOR (RIDE IMPRIMIBLE/PDF)        -->
+    <!-- TAB 9: FACTURA FORMAL SRI ECUADOR (RIDE IMPRIMIBLE/PDF)        -->
     <!-- ============================================================== -->
     <section id="tabInvoiceView" class="tab-content hidden space-y-6">
 
@@ -963,14 +968,15 @@
           
           <!-- Datos del Emisor -->
           <div class="space-y-2">
-            <div class="flex items-center gap-2">
-              <div id="invoiceLogoContainer" class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xl overflow-hidden">
-                🛍️
+            <div class="flex items-center gap-2.5">
+              <div id="invLogoContainer" class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black text-xl shadow-sm overflow-hidden border border-purple-300">
+                <span id="invLogoEmoji">🛍️</span>
+                <img id="invLogoImg" src="" alt="Logo" class="w-full h-full object-cover hidden">
               </div>
               <h2 id="invIssuerTradeName" class="text-xl font-extrabold tracking-tight text-slate-900 uppercase">BOUTIQUE JHORDY</h2>
             </div>
             <p class="text-xs text-slate-600">Razón Social: <span id="invIssuerName" class="font-bold text-slate-800">JHORDY ALEXANDER</span></p>
-            <p class="text-xs text-slate-600">Dirección Matriz: <span id="invIssuerAddress" class="font-semibold text-slate-800">Tupigachi - Ecuador 🇪🇨</span></p>
+            <p class="text-xs text-slate-600">Dirección Matriz: <span id="invIssuerAddress" class="font-semibold text-slate-800">Tupigachi, Pichincha, Ecuador 🇪🇨</span></p>
             <p class="text-xs text-slate-600">Teléfono: <span id="invIssuerPhone" class="font-semibold text-slate-800">0963923399</span></p>
             <div class="pt-1 text-[11px] text-slate-500 space-y-0.5">
               <p>OBLIGADO A LLEVAR CONTABILIDAD: <span id="invAccountingObliged" class="font-bold text-slate-700">NO</span></p>
@@ -1102,20 +1108,20 @@
     </button>
   </nav>
 
-  <!-- Pie de Página Oficial con Créditos y Redes Sociales -->
+  <!-- Pie de Página Oficial con Créditos, Redes y Contacto -->
   <footer class="no-print mt-auto bg-slate-950 text-slate-400 border-t border-slate-800 py-6 px-4">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
       <div>
         <p class="font-black text-slate-200">
-          Diseñado por <span class="text-purple-400">I´m_Jhordy</span>
+          Diseñado por <span class="text-amber-400 font-extrabold">I´m_Jhordy</span>
         </p>
         <p class="text-[11px] mt-0.5 text-slate-400">Tupigachi - Ecuador 🇪🇨</p>
       </div>
 
       <div class="flex items-center gap-4 text-xs font-bold flex-wrap justify-center">
-        <!-- TikTok -->
+        <!-- TikTok Oficial -->
         <a href="https://www.tiktok.com/@mr_jhordy21?_r=1&_t=ZS-9A039casma0" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-slate-300 hover:text-purple-400 transition" title="TikTok @mr_jhordy21">
-          <svg class="w-4 h-4 fill-current shrink-0 inline-block" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 fill-current shrink-0" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
             <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.81 4.48 6.3 6.3 0 0 0 1.86-4.48V8.72a8.18 8.18 0 0 0 4.92 1.63V6.9a4.85 4.85 0 0 1-1-.21z"/>
           </svg>
           <span>TikTok</span>
@@ -1123,7 +1129,7 @@
 
         <!-- Facebook -->
         <span class="flex items-center gap-1 text-slate-500 hover:text-blue-500 cursor-pointer transition" title="Facebook">
-          <svg class="w-4 h-4 fill-current shrink-0 inline-block" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 fill-current shrink-0" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
           </svg>
           <span>Facebook</span>
@@ -1131,7 +1137,7 @@
 
         <!-- YouTube -->
         <span class="flex items-center gap-1 text-slate-500 hover:text-red-500 cursor-pointer transition" title="YouTube">
-          <svg class="w-4 h-4 fill-current shrink-0 inline-block" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 fill-current shrink-0" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
           </svg>
           <span>YouTube</span>
@@ -1139,7 +1145,7 @@
 
         <!-- Instagram -->
         <span class="flex items-center gap-1 text-slate-500 hover:text-pink-500 cursor-pointer transition" title="Instagram">
-          <svg class="w-4 h-4 fill-current shrink-0 inline-block" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 fill-current shrink-0" style="width:16px;height:16px;min-width:16px;" viewBox="0 0 24 24">
             <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
           </svg>
           <span>Instagram</span>
@@ -1154,11 +1160,7 @@
     </div>
   </footer>
 
-  <!-- ============================================================== -->
-  <!-- MODALES DE CONTROL, OPERACIÓN Y CARGA DE EXCEL                 -->
-  <!-- ============================================================== -->
-
-  <!-- Modal 1: REGISTRAR GASTO UNIVERSAL -->
+  <!-- MODAL: REGISTRAR GASTO UNIVERSAL -->
   <div id="modalUniversalExpense" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1213,7 +1215,7 @@
     </div>
   </div>
 
-  <!-- Modal: REGISTRAR INGRESO UNIVERSAL (LOCAL O PERSONAL) -->
+  <!-- MODAL: REGISTRAR INGRESO UNIVERSAL -->
   <div id="modalUniversalIncome" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1257,7 +1259,7 @@
 
         <div>
           <label class="block font-bold text-slate-700 mb-1">Detalle / Origen del Dinero</label>
-          <input type="text" id="universalIncomeDetail" required placeholder="Ej. Aporte de capital, venta particular, sueldo..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          <input type="text" id="universalIncomeDetail" required placeholder="Ej. Aporte de capital, venta particular..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
         </div>
 
         <div class="pt-2 flex justify-end gap-2">
@@ -1268,7 +1270,7 @@
     </div>
   </div>
 
-  <!-- Modal 3: CARGAR MERCADERÍA VÍA EXCEL / CSV -->
+  <!-- MODAL: CARGAR MERCADERÍA VÍA EXCEL / CSV -->
   <div id="modalImportExcel" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 border border-slate-200 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1292,7 +1294,6 @@
         </div>
         <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelFileUpload(event)">
 
-        <!-- Previsualización de los datos leídos -->
         <div id="excelPreviewSection" class="hidden space-y-2">
           <span class="font-black text-xs text-slate-800 block">Prendas detectadas en el archivo: <span id="excelDetectedCount" class="text-purple-600">0</span></span>
           <div class="max-h-40 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50 text-[11px]">
@@ -1314,7 +1315,7 @@
     </div>
   </div>
 
-  <!-- Modal 4: NUEVA PRENDA MANUAL -->
+  <!-- MODAL: NUEVA PRENDA MANUAL -->
   <div id="modalNewProduct" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1341,12 +1342,12 @@
 
         <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Talla (Opcional)</label>
-            <input type="text" id="prodSize" placeholder="M, 32, 40" class="w-full px-2 py-2 rounded-xl border border-slate-300 font-bold">
+            <label class="block font-bold text-slate-700 mb-1">Talla</label>
+            <input type="text" id="prodSize" placeholder="M, 32" class="w-full px-2 py-2 rounded-xl border border-slate-300 font-bold">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Color (Opcional)</label>
-            <input type="text" id="prodColor" placeholder="Negro, Azul" class="w-full px-2 py-2 rounded-xl border border-slate-300 font-bold">
+            <label class="block font-bold text-slate-700 mb-1">Color</label>
+            <input type="text" id="prodColor" placeholder="Negro" class="w-full px-2 py-2 rounded-xl border border-slate-300 font-bold">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Stock *</label>
@@ -1373,55 +1374,7 @@
     </div>
   </div>
 
-  <!-- Modal 5: TRANSFERENCIAS ENTRE CUENTAS -->
-  <div id="modalTransfer" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
-          <i data-lucide="arrow-left-right" class="w-4 h-4 text-amber-500"></i>
-          <span>Transferir entre Cuentas</span>
-        </h3>
-        <button onclick="closeModal('modalTransfer')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <form id="formTransfer" onsubmit="executeTransfer(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Dirección de la Transferencia</label>
-          <select id="transferDirection" onchange="updateTransferMaxNotice()" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold bg-slate-50">
-            <option value="store_to_personal">🛍️ De Local de Ropa ➔ 💳 A Personal (Retiro utilidades)</option>
-            <option value="personal_to_store">💳 De Personal ➔ 🛍️ A Local de Ropa (Inyección capital)</option>
-          </select>
-        </div>
-
-        <div id="transferOriginNotice" class="p-2.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 font-mono font-bold text-[11px]">
-          Saldo disponible: $0.00
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Fecha</label>
-            <input type="date" id="transferDate" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Monto ($ USD)</label>
-            <input type="number" step="0.01" min="0.01" id="transferAmount" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold text-base">
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Nota / Detalle</label>
-          <input type="text" id="transferNote" required placeholder="Ej. Retiro quincenal de ganancias..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
-        </div>
-
-        <div class="pt-2 flex justify-end gap-2">
-          <button type="button" onclick="closeModal('modalTransfer')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shadow">Transferir Dinero</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: PASAR VENTAS DE LA NOCHE (LOTE / CARRITO RÁPIDO) -->
+  <!-- MODAL: VENTAS EN LOTE / CARRITO RÁPIDO -->
   <div id="modalBatchSale" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
     <div class="bg-white rounded-3xl p-5 sm:p-6 max-w-2xl w-full shadow-2xl space-y-4 border border-slate-200 max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1435,7 +1388,6 @@
         <button onclick="closeModal('modalBatchSale')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- Datos Generales de la Venta -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs">
         <div>
           <label class="block font-bold text-slate-600 mb-1">Fecha</label>
@@ -1455,7 +1407,6 @@
         </div>
       </div>
 
-      <!-- Selector Rápido con Búsqueda de Prendas -->
       <div class="p-3.5 bg-purple-50 rounded-2xl border border-purple-200 space-y-2.5 text-xs">
         <span class="font-black text-purple-950 block">Seleccionar Prenda para Añadir:</span>
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
@@ -1483,7 +1434,6 @@
         </div>
       </div>
 
-      <!-- Tabla del Carrito de la Noche -->
       <div class="space-y-2 text-xs">
         <span class="font-black text-slate-800 block">Prendas en esta Venta (<span id="batchItemsCount">0</span>):</span>
         <div class="max-h-48 overflow-y-auto border border-slate-200 rounded-2xl">
@@ -1504,7 +1454,6 @@
         </div>
       </div>
 
-      <!-- Totales del Lote -->
       <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 grid grid-cols-3 gap-2 text-center text-xs">
         <div>
           <span class="text-emerald-800 font-bold block text-[10px]">Total Venta</span>
@@ -1539,7 +1488,7 @@
             <i data-lucide="truck" class="w-5 h-5 text-purple-600"></i>
             <span>Ingreso de Mercadería Comprada (Lote)</span>
           </h3>
-          <p class="text-[11px] text-slate-500">Añade prendas compradas (nuevas o existentes) y súbelas todas de golpe.</p>
+          <p class="text-[11px] text-slate-500">Añade prendas compradas (nuevas o existentes) y súbelas todas en bloque.</p>
         </div>
         <button onclick="closeModal('modalBatchRestock')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -1550,19 +1499,18 @@
           <input type="date" id="batchRestockDate" required class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold">
         </div>
         <div>
-          <label class="block font-bold text-slate-600 mb-1">Proveedor / Nota (Opcional)</label>
+          <label class="block font-bold text-slate-600 mb-1">Proveedor / Nota</label>
           <input type="text" id="batchRestockSupplier" placeholder="Ej. Mayorista El Tejar" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-semibold">
         </div>
       </div>
 
-      <!-- Selector o Creador de Prenda -->
       <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5 text-xs">
         <div class="flex items-center justify-between">
           <span class="font-black text-slate-800">Prenda a Ingresar:</span>
           <div class="flex gap-2">
             <label class="flex items-center gap-1 text-[11px] font-bold text-purple-700 cursor-pointer">
               <input type="radio" name="restockMode" value="existing" checked onchange="toggleRestockMode()" class="accent-purple-600">
-              <span>Prenda Existente (Sumar Stock)</span>
+              <span>Prenda Existente</span>
             </label>
             <label class="flex items-center gap-1 text-[11px] font-bold text-slate-600 cursor-pointer">
               <input type="radio" name="restockMode" value="new" onchange="toggleRestockMode()" class="accent-purple-600">
@@ -1571,13 +1519,11 @@
           </div>
         </div>
 
-        <!-- Modo Prenda Existente -->
         <div id="restockExistingContainer">
           <label class="block font-bold text-slate-600 mb-1">Elegir Prenda Existente</label>
           <select id="restockProductSelect" onchange="onSelectRestockExistingProduct()" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-bold bg-white"></select>
         </div>
 
-        <!-- Modo Prenda Nueva -->
         <div id="restockNewContainer" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div>
             <label class="block font-bold text-slate-600 mb-0.5">Nombre de la Prenda *</label>
@@ -1593,10 +1539,9 @@
           </div>
         </div>
 
-        <!-- Valores de Cantidad y Costo -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
           <div>
-            <label class="block font-bold text-slate-600 mb-0.5">Cantidad Comprada *</label>
+            <label class="block font-bold text-slate-600 mb-0.5">Cantidad *</label>
             <input type="number" min="1" id="restockQty" value="1" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
           </div>
           <div>
@@ -1608,7 +1553,7 @@
             <input type="number" step="0.01" min="0" id="restockPrice" placeholder="0.00" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
           </div>
           <div>
-            <label class="block font-bold text-slate-400 mb-0.5">Talla / Color (Opcional)</label>
+            <label class="block font-bold text-slate-400 mb-0.5">Talla / Color</label>
             <input type="text" id="restockSizeColor" placeholder="M / Azul" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-slate-500 font-semibold">
           </div>
         </div>
@@ -1621,7 +1566,6 @@
         </div>
       </div>
 
-      <!-- Tabla del Lote de Compra -->
       <div class="space-y-2 text-xs">
         <span class="font-black text-slate-800 block">Prendas en esta Compra (<span id="batchRestockItemsCount">0</span>):</span>
         <div class="max-h-48 overflow-y-auto border border-slate-200 rounded-2xl">
@@ -1651,13 +1595,13 @@
         <button type="button" onclick="closeModal('modalBatchRestock')" class="px-4 py-2 font-bold text-slate-500 text-xs">Cancelar</button>
         <button type="button" onclick="confirmBatchRestock()" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow flex items-center gap-1.5 active:scale-95 transition">
           <i data-lucide="check" class="w-4 h-4"></i>
-          <span>📦 Guardar Toda la Mercadería Comprada</span>
+          <span>📦 Guardar Mercadería Comprada</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: NUEVA DEUDA (UNIFICADO LOCAL O PERSONAL) -->
+  <!-- MODAL: NUEVA DEUDA -->
   <div id="modalDebt" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1685,7 +1629,7 @@
 
         <div>
           <label class="block font-bold text-slate-700 mb-1">Nombre / Entidad / Acreedor</label>
-          <input type="text" id="debtName" required placeholder="Ej. Crédito Mercadería Mayorista, Tarjeta Banco..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          <input type="text" id="debtName" required placeholder="Ej. Crédito Mayorista, Banco..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -1759,7 +1703,55 @@
     </div>
   </div>
 
-  <!-- MODAL: AJUSTES & RESPALDO (CON LOGO Y DOBLE CONTRASEÑA) -->
+  <!-- MODAL: TRANSFERENCIAS ENTRE CUENTAS -->
+  <div id="modalTransfer" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="arrow-left-right" class="w-4 h-4 text-amber-500"></i>
+          <span>Transferir entre Cuentas</span>
+        </h3>
+        <button onclick="closeModal('modalTransfer')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="formTransfer" onsubmit="executeTransfer(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Dirección de la Transferencia</label>
+          <select id="transferDirection" onchange="updateTransferMaxNotice()" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold bg-slate-50">
+            <option value="store_to_personal">🛍️ De Local de Ropa ➔ 💳 A Personal (Retiro utilidades)</option>
+            <option value="personal_to_store">💳 De Personal ➔ 🛍️ A Local de Ropa (Inyección capital)</option>
+          </select>
+        </div>
+
+        <div id="transferOriginNotice" class="p-2.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 font-mono font-bold text-[11px]">
+          Saldo disponible: $0.00
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha</label>
+            <input type="date" id="transferDate" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Monto ($ USD)</label>
+            <input type="number" step="0.01" min="0.01" id="transferAmount" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold text-base">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nota / Detalle</label>
+          <input type="text" id="transferNote" required placeholder="Ej. Retiro de ganancias..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalTransfer')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shadow">Transferir Dinero</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AJUSTES, LOGO PERSONALIZADO & RESPALDOS -->
   <div id="modalSettings" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200 max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -1770,7 +1762,28 @@
         <button onclick="closeModal('modalSettings')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <form onsubmit="saveSettings(event)" class="space-y-3 text-xs">
+      <form onsubmit="saveSettings(event)" class="space-y-3.5 text-xs">
+        <!-- Subir Logo o Foto del Negocio -->
+        <div class="p-3 bg-purple-50 rounded-2xl border border-purple-200 space-y-2">
+          <span class="font-black text-purple-950 block">Logo o Foto del Local de Ropa</span>
+          <div class="flex items-center gap-3">
+            <div id="settingsLogoPreview" class="w-12 h-12 rounded-xl bg-white border border-purple-300 flex items-center justify-center text-xl overflow-hidden shadow-sm flex-shrink-0">
+              <span id="settingsLogoPreviewEmoji">🛍️</span>
+              <img id="settingsLogoPreviewImg" src="" alt="Logo" class="w-full h-full object-cover hidden">
+            </div>
+            <div class="space-y-1">
+              <button type="button" onclick="document.getElementById('storeLogoInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow transition">
+                Subir Foto / Logo
+              </button>
+              <button type="button" onclick="removeStoreLogo()" class="text-slate-500 hover:text-rose-600 font-semibold text-[11px] block">
+                Quitar logo
+              </button>
+              <input type="file" id="storeLogoInput" accept="image/*" class="hidden" onchange="handleStoreLogoUpload(event)">
+            </div>
+          </div>
+          <p class="text-[10px] text-purple-800 leading-tight">Aparecerá en la barra superior, en el local y en tu factura RIDE del SRI.</p>
+        </div>
+
         <div>
           <label class="block font-bold text-slate-700 mb-1">Nombre del Local / Empresa</label>
           <input type="text" id="settingStoreName" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
@@ -1779,25 +1792,6 @@
         <div>
           <label class="block font-bold text-slate-700 mb-1">Nombre del Propietario</label>
           <input type="text" id="settingOwnerName" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
-        </div>
-
-        <!-- FOTO O LOGO DEL LOCAL -->
-        <div class="p-3 bg-purple-50 rounded-2xl border border-purple-200 space-y-2">
-          <label class="block font-bold text-purple-950">Foto o Logo de la Boutique / Local</label>
-          <div class="flex items-center gap-3">
-            <div id="settingsLogoPreview" class="w-12 h-12 rounded-xl bg-white border border-purple-300 flex items-center justify-center text-xl overflow-hidden shadow-sm">
-              🛍️
-            </div>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="triggerStoreLogoInput()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition">
-                Subir Foto / Logo
-              </button>
-              <button type="button" onclick="removeStoreLogo()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-1.5 px-3 rounded-xl text-xs transition">
-                Quitar
-              </button>
-              <input type="file" id="storeLogoFileInput" accept="image/*" class="hidden" onchange="handleStoreLogoFile(event)">
-            </div>
-          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -1810,8 +1804,19 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Contraseña Personal</label>
-            <input type="password" id="settingUserPassword" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold" placeholder="Tu clave secreta">
+            <input type="text" id="settingUserPassword" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
           </div>
+        </div>
+
+        <!-- Interruptor Notificaciones -->
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+          <div>
+            <span class="font-bold text-slate-800 block text-xs">🔔 Notificaciones Inteligentes</span>
+            <span class="text-[10px] text-slate-500">Alertas de prendas en stock 0 y respaldo semanal</span>
+          </div>
+          <button type="button" onclick="toggleSystemNotificationPermission()" id="btnSettingsNotificationToggle" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-200 text-slate-700 transition">
+            Activar
+          </button>
         </div>
 
         <div class="pt-2">
@@ -1823,29 +1828,26 @@
 
       <!-- Respaldos -->
       <div class="pt-3 border-t border-slate-100 space-y-2 text-xs">
-        <span class="font-black text-slate-800 block">💾 Copias de Seguridad y Respaldos</span>
-        <p class="text-[11px] text-slate-500 leading-tight">
-          Tus datos se guardan de forma 100% privada en tu dispositivo. Comparte periódicamente tu respaldo a WhatsApp o descarga tu archivo.
-        </p>
-        <div class="grid grid-cols-3 gap-2">
-          <button onclick="shareBackupData()" class="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-100 transition text-[11px]">
+        <span class="font-black text-slate-800 block">Copias de Seguridad (Privadas en tu Móvil)</span>
+        <div class="grid grid-cols-3 gap-1.5">
+          <button onclick="shareBackupDataWhatsApp()" class="p-2 rounded-xl bg-emerald-600 text-white font-bold flex items-center justify-center gap-1 hover:bg-emerald-500 transition text-[11px]">
             <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
             <span>WhatsApp</span>
           </button>
-          <button onclick="downloadJsonBackup()" class="p-2.5 rounded-xl bg-purple-50 text-purple-800 border border-purple-200 font-bold flex items-center justify-center gap-1.5 hover:bg-purple-100 transition text-[11px]">
+          <button onclick="downloadBackupJSON()" class="p-2 rounded-xl bg-purple-600 text-white font-bold flex items-center justify-center gap-1 hover:bg-purple-500 transition text-[11px]">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span>Descargar</span>
           </button>
-          <button onclick="openModalRestoreBackup()" class="p-2.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-300 font-black flex items-center justify-center gap-1.5 hover:bg-amber-100 transition text-[11px]">
+          <button onclick="openModalRestoreBackup()" class="p-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black flex items-center justify-center gap-1 transition text-[11px]">
             <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-            <span>Cargar Copia</span>
+            <span>Cargar</span>
           </button>
         </div>
       </div>
 
       <!-- Zona de Peligro -->
       <div class="pt-3 border-t border-slate-100 space-y-2">
-        <span class="font-black text-rose-700 block text-xs">⚠️ Zona de Peligro & Reinicio Total</span>
+        <span class="font-black text-rose-700 block text-xs">Zona de Seguridad</span>
         <button onclick="openModalSecurityReset()" class="w-full py-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-bold text-xs rounded-xl transition">
           🚨 Borrar Todos los Datos / Resetear Sistema
         </button>
@@ -1853,21 +1855,20 @@
     </div>
   </div>
 
-  <!-- MODAL: RESTAURAR COPIA DE SEGURIDAD (ARCHIVO O PEGAR TEXTO) -->
-  <div id="modalRestoreBackup" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <!-- MODAL: CARGAR / RESTAURAR COPIA DE SEGURIDAD -->
+  <div id="modalRestoreBackup" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200 text-xs">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <h4 class="font-black text-slate-900 text-sm flex items-center gap-2">
           <span>📥</span>
-          <span>Cargar / Restaurar Copia de Seguridad</span>
+          <span>Cargar / Restaurar Respaldo</span>
         </h4>
         <button onclick="closeModal('modalRestoreBackup')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <div class="space-y-3.5">
-        <!-- Opción 1: Subir Archivo -->
-        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-          <span class="font-bold text-slate-800 block">Opción 1: Seleccionar archivo desde tu dispositivo</span>
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <span class="font-bold text-slate-800 block">Opción 1: Archivo de Descargas</span>
           <button onclick="triggerImportBackup()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition">
             <i data-lucide="folder-open" class="w-4 h-4"></i>
             <span>Buscar archivo de respaldo (.json)</span>
@@ -1875,10 +1876,9 @@
           <input type="file" id="backupFileInput" accept=".json,application/json,text/plain,*/*" class="hidden" onchange="handleBackupFile(event)">
         </div>
 
-        <!-- Opción 2: Pegar Texto -->
         <div class="space-y-1.5">
-          <span class="font-bold text-slate-800 block">Opción 2: O pega aquí el código / JSON copiado</span>
-          <textarea id="restoreRawTextInput" rows="4" placeholder="Pega aquí el código o contenido copiado de tu respaldo..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 outline-none resize-none"></textarea>
+          <span class="font-bold text-slate-800 block">Opción 2: O pega aquí el texto / JSON copiado</span>
+          <textarea id="restoreRawTextInput" rows="4" placeholder="Pega aquí el código copiado de tu chat de WhatsApp o bloc de notas..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-mono text-[11px] text-slate-800 outline-none resize-none"></textarea>
           <button onclick="restoreFromRawText()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow">
             <i data-lucide="check" class="w-4 h-4"></i>
             <span>Restaurar desde Texto Pegado</span>
@@ -1887,14 +1887,14 @@
       </div>
 
       <div class="flex justify-end pt-1">
-        <button onclick="closeModal('modalRestoreBackup')" class="px-4 py-2 font-bold text-slate-500">Cerrar</button>
+        <button onclick="closeModal('modalRestoreBackup')" class="px-4 py-2 font-bold text-slate-400">Cerrar</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: CONFIRMAR BORRADO DE SEGURIDAD (CON ASISTENCIA WHATSAPP) -->
   <div id="modalSecurityReset" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-3 border border-slate-200 text-xs">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-3.5 border border-slate-200 text-xs">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
         <h4 class="font-black text-rose-600 text-sm flex items-center gap-1.5">
           <i data-lucide="alert-triangle" class="w-4 h-4"></i>
@@ -1902,27 +1902,27 @@
         </h4>
         <button onclick="closeModal('modalSecurityReset')" class="text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
-      <p class="text-slate-600">Ingresa tu contraseña personal o la clave maestra oficial de rescate:</p>
-      <input type="password" id="inputResetPassword" placeholder="Escribe tu contraseña..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-sm">
+      <p class="text-slate-600">Ingresa tu contraseña personal o la clave maestra de rescate para vaciar todo el sistema:</p>
+      <input type="password" id="inputResetPassword" placeholder="Contraseña de seguridad..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-sm text-center">
       
-      <!-- Asistencia si olvidó la contraseña -->
-      <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 space-y-1">
+      <!-- Soporte si olvidó la contraseña -->
+      <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 text-left space-y-1">
         <p class="font-bold flex items-center gap-1">
           <span>❓</span>
           <span>¿Olvidaste tu contraseña?</span>
         </p>
         <p class="text-slate-600 leading-tight">
-          Comunícate directamente con <b>Jhordy</b> al celular <b>0963923399</b> para solicitar la clave maestra de rescate.
+          Pide la clave maestra de rescate a <b>Jhordy</b> al celular <b>0963923399</b> en Tupigachi.
         </p>
-        <a href="https://wa.me/593963923399?text=Hola%20Jhordy,%20olvide%20mi%20clave%20en%20el%20sistema%20del%20local%20de%20ropa%20y%20necesito%20la%20clave%20de%20rescate" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold text-emerald-700 hover:underline pt-0.5">
+        <a href="https://wa.me/593963923399?text=Hola%20Jhordy,%20olvide%20mi%20clave%20en%20el%20sistema%20del%20local%20de%20ropa%20y%20necesito%20la%20clave%20de%20rescate" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold text-emerald-600 hover:underline pt-0.5">
           <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-          <span>Pedir clave de rescate a Jhordy por WhatsApp</span>
+          <span>Pedir clave a Jhordy por WhatsApp</span>
         </a>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeModal('modalSecurityReset')" class="px-3 py-2 font-bold text-slate-500">Cancelar</button>
-        <button onclick="executeTotalReset()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-black rounded-xl shadow">Borrar Todo</button>
+        <button onclick="closeModal('modalSecurityReset')" class="px-3.5 py-2 font-bold text-slate-500">Cancelar</button>
+        <button onclick="executeTotalReset()" class="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white font-black rounded-xl shadow transition">Borrar Todo</button>
       </div>
     </div>
   </div>
@@ -1952,7 +1952,7 @@
           <input type="text" id="editInvName" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold">
         </div>
         <div>
-          <label class="block font-bold text-slate-700">Dirección Matriz</label>
+          <label class="block font-bold text-slate-700">Dirección</label>
           <input type="text" id="editInvAddress" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-bold">
         </div>
         <div class="pt-2 flex justify-end gap-2">
@@ -1996,10 +1996,13 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT APPLICATION CORE ENGINE -->
   <script>
+    /* ==========================================================================
+       SISTEMA DE GESTIÓN — LOCAL DE ROPA & FINANZAS PERSONALES | NÚCLEO JS
+       ========================================================================== */
+
     const MASTER_RESCUE_KEY = "I´M_JHORDY";
-    const STORAGE_KEY = "boutique_jhordy_data_v2";
+    const STORAGE_KEY = "boutique_jhordy_data_v3";
 
     // Estado global de la aplicación
     let appState = {
@@ -2009,13 +2012,15 @@
         userPassword: "123",
         activeYear: "2026",
         theme: "light",
-        storeLogo: "",
+        notificationsEnabled: false,
+        lastBackupTimestamp: Date.now(),
+        logoDataUrl: null,
         invoice: {
           ruc: "1726392339001",
           number: "001-001-000000210",
           tradeName: "BOUTIQUE JHORDY",
           name: "JHORDY ALEXANDER",
-          address: "Tupigachi - Ecuador 🇪🇨",
+          address: "Tupigachi - Pichincha, Ecuador 🇪🇨",
           phone: "0963923399",
           accounting: "NO"
         }
@@ -2056,47 +2061,104 @@
       ]
     };
 
-    // Variables temporales
     let currentBatchSaleItems = [];
     let currentBatchRestockItems = [];
     let currentDebtFilter = 'all';
     let excelImportStaging = [];
     let tourStep = 1;
+    let chartSalesInstance = null;
+    let chartCategoryInstance = null;
 
-    const tourSteps = [
-      {
-        icon: "🛍️",
-        title: "1. Separación Estricta de Cuentas",
-        content: "El dinero de tu <b>Local de Ropa</b> y tus <b>Finanzas Personales</b> se lleva en cajas separadas. Cuando gastes dinero, el sistema te preguntará siempre de cuál cuenta se pagará. Si necesitas mover dinero entre ellas, usa el botón <b>Transferir</b>.",
-        target: "tourTargetWelcome"
-      },
-      {
-        icon: "💵",
-        title: "2. Ganancia Neta y Capital Recuperado",
-        content: "En el Dashboard verás en vivo tu <b>Ganancia Limpia</b>, el <b>Capital Recuperado</b> (lo que invertiste en comprar las prendas vendidas) y cuánto tienes <b>Disponible para volver a invertir</b> en nueva mercadería.",
-        target: "tourTargetKPIs"
-      },
-      {
-        icon: "🌙",
-        title: "3. Ventas de la Noche en 1 Solo Paso",
-        content: "Para no abrir el formulario a cada rato, usa <b>'+ Añadir Venta'</b>. Puedes buscar prendas, definir precio y cantidad, presionar <b>'➕ Añadir a la Venta'</b> tantas veces como quieras y al final guardar todo en un solo clic.",
-        target: "navTabPos"
-      },
-      {
-        icon: "📦",
-        title: "4. Compras de Mercadería por Lote",
-        content: "Cuando vayas a comprar mercadería por mayor, usa <b>'+ Ingresar Mercadería'</b>. Puedes elegir prendas ya existentes para sumarles stock o crear prendas nuevas sin necesidad obligatoria de ingresar tallas o colores.",
-        target: "navTabInventory"
-      },
-      {
-        icon: "💳",
-        title: "5. Control de Deudas y Respaldos",
-        content: "Lleva el control de deudas tanto de la tienda como personales. Además, recuerda usar frecuentemente <b>'Compartir Respaldo'</b> en Ajustes ⚙️ para enviarte una copia a tu WhatsApp y no perder tu información si limpias el teléfono.",
-        target: "navTabDebts"
+    function requestPersistentStorage() {
+      if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().then(granted => {
+          if (granted) console.log("Almacenamiento persistente garantizado por el navegador.");
+        }).catch(()=>{});
       }
-    ];
+    }
 
-    // Persistencia LocalStorage
+    async function toggleSystemNotificationPermission() {
+      if (!("Notification" in window)) {
+        showToast("Tu navegador no soporta notificaciones", "⚠️");
+        return;
+      }
+
+      if (Notification.permission === "granted") {
+        appState.settings.notificationsEnabled = !appState.settings.notificationsEnabled;
+        saveState();
+        updateNotificationUI();
+        showToast(appState.settings.notificationsEnabled ? "Notificaciones activadas" : "Notificaciones pausadas");
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        appState.settings.notificationsEnabled = true;
+        saveState();
+        updateNotificationUI();
+        triggerSystemNotification("🛍️ Boutique Jhordy", "¡Notificaciones activadas! Te avisaremos de stock crítico y respaldos semanales.");
+        showToast("Permiso de notificaciones concedido", "✅");
+      } else {
+        appState.settings.notificationsEnabled = false;
+        saveState();
+        updateNotificationUI();
+        showToast("Notificaciones no autorizadas", "⚠️");
+      }
+    }
+
+    function updateNotificationUI() {
+      const isGranted = (window.Notification && Notification.permission === "granted" && appState.settings.notificationsEnabled);
+      const bell = document.getElementById('headerBellIcon');
+      const btnToggle = document.getElementById('btnSettingsNotificationToggle');
+
+      if (bell) {
+        bell.className = `w-3.5 h-3.5 ${isGranted ? 'text-amber-400 fill-current' : 'text-slate-400'}`;
+      }
+      if (btnToggle) {
+        btnToggle.textContent = isGranted ? "Desactivar" : "Activar";
+        btnToggle.className = `px-3 py-1.5 rounded-xl font-bold text-xs ${isGranted ? 'bg-purple-600 text-white' : 'bg-slate-200 text-slate-700'}`;
+      }
+    }
+
+    function triggerSystemNotification(title, body) {
+      if (!appState.settings.notificationsEnabled || !("Notification" in window) || Notification.permission !== "granted") {
+        return;
+      }
+      try {
+        new Notification(title, {
+          body,
+          icon: 'https://cdn-icons-png.flaticon.com/512/3593/3593452.png'
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    // Comprobaciones inteligentes de notificaciones (Stock 0 y Respaldo Semanal)
+    function runSmartNotificationChecks() {
+      if (!appState.settings.notificationsEnabled) return;
+      const now = Date.now();
+
+      // 1. Alerta de Prendas en Stock 0
+      const zeroStockItems = (appState.inventory || []).filter(p => Number(p.stock) === 0);
+      if (zeroStockItems.length > 0) {
+        const itemNames = zeroStockItems.slice(0, 2).map(p => p.name).join(', ');
+        triggerSystemNotification(
+          "⚠️ ¡Prendas Agotadas en Stock!",
+          `Tienes ${zeroStockItems.length} prendas con stock en 0 (${itemNames}). Recuerda reabastecer tu local.`
+        );
+      }
+
+      // 2. Recordatorio Semanal de Respaldo a WhatsApp
+      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+      if (appState.settings.lastBackupTimestamp && (now - appState.settings.lastBackupTimestamp) >= sevenDaysMs) {
+        triggerSystemNotification(
+          "💾 Respaldo Semanal de Boutique Jhordy",
+          "Han pasado 7 días desde tu última copia de seguridad. Toca el botón de WhatsApp para respaldar tus ventas."
+        );
+      }
+    }
+
     function loadStateFromStorage() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -2120,7 +2182,6 @@
       }
     }
 
-    // Notificaciones Toast
     function showToast(msg, icon = '✅') {
       const toast = document.getElementById('toastNotification');
       if (!toast) return;
@@ -2137,7 +2198,6 @@
       }, 3000);
     }
 
-    // Cálculos Financieros
     function calculateFinances() {
       const totalSalesRevenue = (appState.sales || []).reduce((sum, s) => sum + Number(s.totalPaid || 0), 0);
       const totalCostSold = (appState.sales || []).reduce((sum, s) => sum + Number(s.costTotal || 0), 0);
@@ -2192,49 +2252,87 @@
       return total;
     }
 
-    // Manejo y Renderizado del Logo Personalizado
-    function triggerStoreLogoInput() {
-      const input = document.getElementById('storeLogoFileInput');
-      if (input) {
-        input.value = '';
-        input.click();
+    function renderAppLogos() {
+      const logoUrl = appState.settings.logoDataUrl;
+
+      const headerEmoji = document.getElementById('headerLogoDefault');
+      const headerImg = document.getElementById('headerLogoImg');
+      if (headerEmoji && headerImg) {
+        if (logoUrl) {
+          headerEmoji.classList.add('hidden');
+          headerImg.src = logoUrl;
+          headerImg.classList.remove('hidden');
+        } else {
+          headerEmoji.classList.remove('hidden');
+          headerImg.classList.add('hidden');
+          headerImg.src = '';
+        }
+      }
+
+      const cardEmoji = document.getElementById('dashStoreCardEmoji');
+      const cardImg = document.getElementById('dashStoreCardLogoImg');
+      if (cardEmoji && cardImg) {
+        if (logoUrl) {
+          cardEmoji.classList.add('hidden');
+          cardImg.src = logoUrl;
+          cardImg.classList.remove('hidden');
+        } else {
+          cardEmoji.classList.remove('hidden');
+          cardImg.classList.add('hidden');
+          cardImg.src = '';
+        }
+      }
+
+      const invEmoji = document.getElementById('invLogoEmoji');
+      const invImg = document.getElementById('invLogoImg');
+      if (invEmoji && invImg) {
+        if (logoUrl) {
+          invEmoji.classList.add('hidden');
+          invImg.src = logoUrl;
+          invImg.classList.remove('hidden');
+        } else {
+          invEmoji.classList.remove('hidden');
+          invImg.classList.add('hidden');
+          invImg.src = '';
+        }
+      }
+
+      const prevEmoji = document.getElementById('settingsLogoPreviewEmoji');
+      const prevImg = document.getElementById('settingsLogoPreviewImg');
+      if (prevEmoji && prevImg) {
+        if (logoUrl) {
+          prevEmoji.classList.add('hidden');
+          prevImg.src = logoUrl;
+          prevImg.classList.remove('hidden');
+        } else {
+          prevEmoji.classList.remove('hidden');
+          prevImg.classList.add('hidden');
+          prevImg.src = '';
+        }
       }
     }
 
-    function handleStoreLogoFile(event) {
+    function handleStoreLogoUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      if (!file.type.startsWith('image/')) {
-        showToast("Selecciona un archivo de imagen válido", "⚠️");
-        return;
-      }
+
       const reader = new FileReader();
       reader.onload = function(e) {
-        appState.settings.storeLogo = e.target.result;
+        appState.settings.logoDataUrl = e.target.result;
         saveState();
-        showToast("¡Logo del local actualizado correctamente!", "📸");
+        renderAppLogos();
+        showToast("¡Logo del local cargado exitosamente!");
       };
       reader.readAsDataURL(file);
     }
 
     function removeStoreLogo() {
-      appState.settings.storeLogo = "";
+      appState.settings.logoDataUrl = null;
       saveState();
-      showToast("Se restableció el icono estándar (🛍️)", "ℹ️");
+      renderAppLogos();
+      showToast("Logo removido");
     }
 
-    function renderStoreLogos() {
-      const hasLogo = Boolean(appState.settings && appState.settings.storeLogo);
-      const imgHtml = hasLogo ? `<img src="${appState.settings.storeLogo}" alt="Logo" class="w-full h-full object-cover">` : '🛍️';
-      
-      const elements = ['headerStoreLogoContainer', 'dashStoreLogoContainer', 'invoiceLogoContainer', 'settingsLogoPreview'];
-      elements.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = imgHtml;
-      });
-    }
-
-    // Actualización de toda la interfaz
     function refreshAllUI() {
       const f = calculateFinances();
 
@@ -2263,7 +2361,8 @@
       document.getElementById('dashPersonalExpense').textContent = `$${f.personalExpenseTotal.toFixed(2)}`;
       document.getElementById('dashPersonalDebt').textContent = `$${calculateTotalRemainingDebt().toFixed(2)}`;
 
-      renderStoreLogos();
+      renderAppLogos();
+      updateNotificationUI();
       checkCriticalStock();
       renderHomeRecentTransactions();
       renderInventoryTable();
@@ -2278,7 +2377,6 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // Alerta de stock crítico
     function checkCriticalStock() {
       const container = document.getElementById('stockCriticalAlertContainer');
       const listEl = document.getElementById('stockCriticalList');
@@ -2300,9 +2398,6 @@
       });
     }
 
-    // ==============================================================
-    // INVENTARIO & PRENDAS
-    // ==============================================================
     function openModalNewProduct() {
       document.getElementById('formNewProduct').reset();
       const selCat = document.getElementById('prodCategory');
@@ -2389,12 +2484,9 @@
     function deleteProduct(id) {
       appState.inventory = (appState.inventory || []).filter(p => p.id !== id);
       saveState();
-      showToast("Prenda eliminada del inventario");
+      showToast("Prenda eliminada");
     }
 
-    // ==============================================================
-    // EXCEL / CSV IMPORT & EXPORT
-    // ==============================================================
     function openModalImportExcel() {
       document.getElementById('excelFileInput').value = '';
       document.getElementById('excelPreviewSection').classList.add('hidden');
@@ -2489,9 +2581,6 @@
       showToast(`¡Se importaron ${excelImportStaging.length} prendas exitosamente!`);
     }
 
-    // ==============================================================
-    // VENTAS EN LOTE (CARRITO RÁPIDO DE LA NOCHE)
-    // ==============================================================
     function openModalBatchSale() {
       currentBatchSaleItems = [];
       document.getElementById('batchSaleDate').value = new Date().toISOString().split('T')[0];
@@ -2700,12 +2789,9 @@
       }
       appState.sales = (appState.sales || []).filter(s => s.id !== id);
       saveState();
-      showToast("Venta anulada y stock devuelto al inventario");
+      showToast("Venta anulada y stock devuelto");
     }
 
-    // ==============================================================
-    // COMPRAS DE MERCADERÍA EN LOTE
-    // ==============================================================
     function openModalBatchRestock() {
       currentBatchRestockItems = [];
       document.getElementById('batchRestockDate').value = new Date().toISOString().split('T')[0];
@@ -2780,7 +2866,7 @@
         prodId = document.getElementById('restockProductSelect').value;
         const prod = (appState.inventory || []).find(p => p.id === prodId);
         if (!prod) {
-          showToast("Selecciona una prenda existente válida", "⚠️");
+          showToast("Selecciona una prenda válida", "⚠️");
           return;
         }
         name = prod.name;
@@ -2789,7 +2875,7 @@
       } else {
         name = document.getElementById('restockNewName').value.trim();
         if (!name) {
-          showToast("Debes escribir el nombre de la prenda nueva", "⚠️");
+          showToast("Escribe el nombre de la prenda nueva", "⚠️");
           return;
         }
         category = document.getElementById('restockNewCategory').value;
@@ -2906,9 +2992,6 @@
       showToast(`¡Mercadería ingresada exitosamente! Stock actualizado.`);
     }
 
-    // ==============================================================
-    // GASTOS & MOVIMIENTOS UNIVERSALES
-    // ==============================================================
     function openModalUniversalExpense(defaultChoice = 'store') {
       document.getElementById('formUniversalExpense').reset();
       document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
@@ -2962,9 +3045,6 @@
       showToast("Gasto guardado exitosamente");
     }
 
-    // ==============================================================
-    // INGRESO UNIVERSAL (LOCAL O PERSONAL)
-    // ==============================================================
     function openModalUniversalIncome(defaultChoice = 'store') {
       document.getElementById('formUniversalIncome').reset();
       document.getElementById('universalIncomeDate').value = new Date().toISOString().split('T')[0];
@@ -3021,9 +3101,6 @@
       showToast(`Ingreso guardado en ${choice === 'store' ? 'el Local de Ropa' : 'Personal'}`);
     }
 
-    // ==============================================================
-    // TABLAS CONTABLES (LOCAL Y PERSONAL)
-    // ==============================================================
     function renderStoreAccounting() {
       const tbody = document.getElementById('storeAccountingTableBody');
       tbody.innerHTML = '';
@@ -3086,7 +3163,7 @@
     function deleteStoreTransaction(id) {
       appState.storeTransactions = (appState.storeTransactions || []).filter(t => t.id !== id);
       saveState();
-      showToast("Registro contable eliminado");
+      showToast("Registro eliminado");
     }
 
     function renderPersonalTransactions() {
@@ -3161,9 +3238,6 @@
       });
     }
 
-    // ==============================================================
-    // CONTROL DE DEUDAS UNIFICADO
-    // ==============================================================
     function openModalDebt() {
       document.getElementById('formDebt').reset();
       document.getElementById('debtStart').value = new Date().toISOString().split('T')[0];
@@ -3271,7 +3345,7 @@
       appState.debts = (appState.debts || []).filter(d => d.id !== id);
       appState.debtPayments = (appState.debtPayments || []).filter(p => p.debtId !== id);
       saveState();
-      showToast("Deuda y abonos eliminados");
+      showToast("Deuda eliminada");
     }
 
     function openModalDebtPayment(preselectedId = null) {
@@ -3330,9 +3404,6 @@
       showToast("Abono registrado y descontado en contabilidad");
     }
 
-    // ==============================================================
-    // TRANSFERENCIAS INTERCUENTAS
-    // ==============================================================
     function openModalTransfer() {
       document.getElementById('formTransfer').reset();
       document.getElementById('transferDate').value = new Date().toISOString().split('T')[0];
@@ -3414,9 +3485,6 @@
       });
     }
 
-    // ==============================================================
-    // ADMINISTRADOR DE CATEGORÍAS
-    // ==============================================================
     function renderCategoriesLists() {
       const ulStore = document.getElementById('listStoreExpenseCats');
       if (ulStore) {
@@ -3494,9 +3562,39 @@
       showToast("Categoría eliminada");
     }
 
-    // ==============================================================
-    // GUÍA INTERACTIVA PASO A PASO
-    // ==============================================================
+    const tourSteps = [
+      {
+        icon: "🛍️",
+        title: "1. Separación Estricta de Cuentas",
+        content: "El dinero de tu <b>Local de Ropa</b> y tus <b>Finanzas Personales</b> se lleva en cajas separadas. Cuando gastes dinero, el sistema te preguntará siempre de cuál cuenta se pagará. Si necesitas mover dinero entre ellas, usa el botón <b>Transferir</b>.",
+        target: "tourTargetWelcome"
+      },
+      {
+        icon: "💵",
+        title: "2. Ganancia Neta y Capital Recuperado",
+        content: "En el Dashboard verás en vivo tu <b>Ganancia Limpia</b>, el <b>Capital Recuperado</b> (lo que invertiste en comprar las prendas vendidas) y cuánto tienes <b>Disponible para volver a invertir</b> en nueva mercadería.",
+        target: "tourTargetKPIs"
+      },
+      {
+        icon: "🛒",
+        title: "3. Ventas de Mostrador en 1 Solo Paso",
+        content: "Para no abrir el formulario a cada rato, usa <b>'+ Añadir Venta'</b>. Puedes buscar prendas, definir precio y cantidad, presionar <b>'➕ Añadir a la Venta'</b> tantas veces como quieras y al final guardar todo en un solo clic.",
+        target: "navTabPos"
+      },
+      {
+        icon: "📦",
+        title: "4. Compras de Mercadería por Lote",
+        content: "Cuando vayas a comprar mercadería por mayor, usa <b>'+ Ingresar Mercadería'</b>. Puedes elegir prendas ya existentes para sumarles stock o crear prendas nuevas sin necesidad obligatoria de ingresar tallas o colores.",
+        target: "navTabInventory"
+      },
+      {
+        icon: "📲",
+        title: "5. Respaldo Permanente a WhatsApp",
+        content: "En la parte superior tienes siempre visible el botón <b>'📲 Respaldar en WhatsApp'</b>. Puedes enviarte un respaldo a tu propio chat en cualquier momento para no perder tus datos.",
+        target: "navTabHome"
+      }
+    ];
+
     function openModalHelpTour() {
       tourStep = 1;
       updateTourStepDisplay();
@@ -3549,15 +3647,13 @@
       }
     }
 
-    // ==============================================================
-    // AJUSTES, RESPALDO Y RESET
-    // ==============================================================
     function openModalSettings() {
       document.getElementById('settingStoreName').value = appState.settings.storeName;
       document.getElementById('settingOwnerName').value = appState.settings.ownerName;
-      document.getElementById('settingUserPassword').value = appState.settings.userPassword || "123";
+      document.getElementById('settingUserPassword').value = appState.settings.userPassword;
       document.getElementById('settingThemeSelect').value = appState.settings.theme || 'light';
-      renderStoreLogos();
+      renderAppLogos();
+      updateNotificationUI();
       document.getElementById('modalSettings').classList.remove('hidden');
     }
 
@@ -3601,48 +3697,28 @@
       showToast("Todos los datos fueron borrados exitosamente", "🚨");
     }
 
-    function shareBackupWhatsApp() {
+    function shareBackupDataWhatsApp() {
+      appState.settings.lastBackupTimestamp = Date.now();
+      saveState();
       const f = calculateFinances();
-      const summary = `*RESPALDO - ${appState.settings.storeName}*\nFecha: ${new Date().toLocaleDateString()}\nPropietario: ${appState.settings.ownerName}\nSaldo Local: $${f.storeFinalBalance.toFixed(2)}\nSaldo Personal: $${f.personalFinalBalance.toFixed(2)}\nPrendas en Stock: ${f.totalStockUnits}`;
+      const summary = `*RESPALDO BOUTIQUE JHORDY*\nFecha: ${new Date().toLocaleDateString()}\nLocal: ${appState.settings.storeName}\nPropietario: ${appState.settings.ownerName}\nSaldo Local: $${f.storeFinalBalance.toFixed(2)}\nSaldo Personal: $${f.personalFinalBalance.toFixed(2)}\nPrendas en Stock: ${f.totalStockUnits}\nUbicación: Tupigachi - Ecuador 🇪🇨`;
       const url = `https://wa.me/593963923399?text=${encodeURIComponent(summary)}`;
       window.open(url, '_blank');
+      showToast("Abriendo WhatsApp con tu resumen de respaldo", "✅");
     }
 
-    function downloadJsonBackup() {
-      const dataString = JSON.stringify(appState, null, 2);
+    function downloadBackupJSON() {
+      appState.settings.lastBackupTimestamp = Date.now();
+      saveState();
+      const dataString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
       const filename = `Respaldo_${appState.settings.storeName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
-      const blob = new Blob([dataString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
+      a.setAttribute("href", dataString);
+      a.setAttribute("download", filename);
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast("Copia de seguridad descargada en tu dispositivo", "💾");
-    }
-
-    async function shareBackupData() {
-      const dataString = JSON.stringify(appState, null, 2);
-      const filename = `Respaldo_${appState.settings.storeName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
-      const blob = new Blob([dataString], { type: 'application/json' });
-
-      if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'application/json' })] })) {
-        try {
-          const file = new File([blob], filename, { type: 'application/json' });
-          await navigator.share({
-            title: `Copia de Seguridad - ${appState.settings.storeName}`,
-            text: `Respaldo integral de ${appState.settings.storeName}`,
-            files: [file]
-          });
-          showToast("Respaldo compartido");
-          return;
-        } catch (e) {
-          console.log(e);
-        }
-      }
-      shareBackupWhatsApp();
+      a.remove();
+      showToast("Copia descargada en tu dispositivo");
     }
 
     function openModalRestoreBackup() {
@@ -3672,7 +3748,7 @@
     function restoreFromRawText() {
       const raw = document.getElementById('restoreRawTextInput').value.trim();
       if (!raw) {
-        showToast("Pega el código o JSON de respaldo", "⚠️");
+        showToast("Pega el texto JSON de respaldo", "⚠️");
         return;
       }
       processRestoredJson(raw);
@@ -3681,29 +3757,27 @@
     function processRestoredJson(jsonString) {
       try {
         const imported = JSON.parse(jsonString);
-        if (imported && (imported.inventory || imported.sales || imported.settings || imported.storeTransactions)) {
-          appState = { ...appState, ...imported };
+        if (imported && (imported.settings || imported.inventory)) {
+          appState = imported;
           saveState();
           closeModal('modalRestoreBackup');
           closeModal('modalSettings');
-          if (window.confetti) confetti({ particleCount: 70, spread: 60 });
-          showToast("¡Copia de seguridad restaurada con éxito!", "✅");
+          if (window.confetti) confetti({ particleCount: 75, spread: 60 });
+          renderAppLogos();
+          showToast("¡Respaldo restaurado exitosamente!");
         } else {
-          showToast("El formato del archivo no es válido", "❌");
+          showToast("Formato de respaldo no válido", "❌");
         }
       } catch (err) {
-        showToast("Error al leer el archivo o código JSON", "❌");
+        showToast("Error al leer el archivo o texto JSON", "❌");
       }
     }
 
-    // ==============================================================
-    // FACTURA SRI RIDE
-    // ==============================================================
     function renderInvoicePreview() {
       const inv = appState.settings.invoice;
       document.getElementById('invIssuerTradeName').textContent = inv.tradeName || appState.settings.storeName;
       document.getElementById('invIssuerName').textContent = inv.name || appState.settings.ownerName;
-      document.getElementById('invIssuerAddress').textContent = inv.address || "Tupigachi - Ecuador 🇪🇨";
+      document.getElementById('invIssuerAddress').textContent = inv.address || "Tupigachi - Pichincha, Ecuador 🇪🇨";
       document.getElementById('invIssuerPhone').textContent = inv.phone;
       document.getElementById('invAccountingObliged').textContent = inv.accounting;
       document.getElementById('invIssuerRuc').textContent = inv.ruc;
@@ -3752,7 +3826,7 @@
       document.getElementById('editInvNumber').value = inv.number;
       document.getElementById('editInvTradeName').value = inv.tradeName;
       document.getElementById('editInvName').value = inv.name;
-      document.getElementById('editInvAddress').value = inv.address || "Tupigachi - Ecuador 🇪🇨";
+      document.getElementById('editInvAddress').value = inv.address;
       document.getElementById('modalInvoiceEditor').classList.remove('hidden');
     }
 
@@ -3767,12 +3841,6 @@
       closeModal('modalInvoiceEditor');
       showToast("Factura SRI actualizada");
     }
-
-    // ==============================================================
-    // GRÁFICOS CHART.JS
-    // ==============================================================
-    let chartSalesInstance = null;
-    let chartCategoryInstance = null;
 
     function updateCharts() {
       if (!window.Chart) return;
@@ -3844,9 +3912,6 @@
       }
     }
 
-    // ==============================================================
-    // NAVEGACIÓN Y TEMA
-    // ==============================================================
     function switchMainTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
       document.querySelectorAll('.nav-tab').forEach(b => {
@@ -3923,16 +3988,19 @@
       if (window.Chart) updateCharts();
     }
 
-    // Arranque de la aplicación
+    // Arranque de la aplicación al cargar ventana
     window.addEventListener('DOMContentLoaded', () => {
       loadStateFromStorage();
+      requestPersistentStorage();
       initTheme();
+      renderAppLogos();
       refreshAllUI();
+      runSmartNotificationChecks();
       if (window.lucide) lucide.createIcons();
 
-      if (!localStorage.getItem('boutique_onboarded_tour')) {
+      if (!localStorage.getItem('boutique_onboarded_tour_v3')) {
         setTimeout(openModalHelpTour, 500);
-        localStorage.setItem('boutique_onboarded_tour', 'true');
+        localStorage.setItem('boutique_onboarded_tour_v3', 'true');
       }
     });
   </script>
