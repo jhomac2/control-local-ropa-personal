@@ -67,7 +67,6 @@
       border-color: #475569 !important;
     }
 
-    /* Estilos formales de la Factura RIDE SRI Ecuador */
     #printableInvoiceArea { background-color: #ffffff !important; color: #0f172a !important; }
     #printableInvoiceArea .bg-slate-50 { background-color: #f8fafc !important; color: #0f172a !important; }
     #printableInvoiceArea .border-slate-200, #printableInvoiceArea .border-slate-300 { border-color: #cbd5e1 !important; }
@@ -234,6 +233,36 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
+          <!-- Filtros de Período del Dashboard (Año y Mes) -->
+          <div class="flex items-center gap-1.5 bg-slate-800/90 border border-purple-500/30 px-3 py-1.5 rounded-2xl text-xs">
+            <span class="text-purple-300 font-bold">📅 Período:</span>
+            <select id="dashYearFilter" onchange="refreshAllUI()" class="bg-slate-900 text-white font-bold rounded-lg px-2 py-1 outline-none text-xs border border-slate-700">
+              <option value="all">Todos los Años</option>
+              <option value="2026" selected>2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+            <select id="dashMonthFilter" onchange="refreshAllUI()" class="bg-slate-900 text-white font-bold rounded-lg px-2 py-1 outline-none text-xs border border-slate-700">
+              <option value="all">Todo el Año</option>
+              <option value="01">Enero</option>
+              <option value="02">Febrero</option>
+              <option value="03">Marzo</option>
+              <option value="04">Abril</option>
+              <option value="05">Mayo</option>
+              <option value="06">Junio</option>
+              <option value="07">Julio</option>
+              <option value="08">Agosto</option>
+              <option value="09" selected>Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+
+          <button onclick="openModalExtraIncome('personal')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-2.5 rounded-2xl text-xs font-black shadow flex items-center gap-1.5 transition">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>+ Ingreso Extra</span>
+          </button>
           <button onclick="openModalNewProduct()" class="bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow flex items-center gap-1.5 transition">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span>+ Nueva Prenda</span>
@@ -246,7 +275,7 @@
       </div>
 
       <!-- TARJETAS PRINCIPALES (KPIS) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <!-- Caja Boutique -->
         <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
           <div class="flex items-center justify-between">
@@ -286,6 +315,16 @@
           <span id="kpiPersonalBalance" class="font-mono text-2xl font-black text-blue-600 block mt-2">$0.00</span>
           <p class="text-[11px] text-slate-500 mt-1">Ingresos propios − Gastos hogar</p>
         </div>
+
+        <!-- KPI INGRESOS EXTRAS TOTALES (DASHBOARD) -->
+        <div class="bg-gradient-to-br from-amber-500 via-amber-600 to-orange-600 text-slate-950 rounded-3xl p-5 border border-amber-300 shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase text-amber-950">Ingresos Extras</span>
+            <span class="text-lg">✨</span>
+          </div>
+          <span id="kpiTotalExtraIncome" class="font-mono text-2xl font-black text-slate-950 block mt-2">$0.00</span>
+          <p class="text-[11px] text-amber-950 font-semibold mt-1">Trabajos extras, comisiones y otros ingresos</p>
+        </div>
       </div>
 
       <!-- Gráficos de Ventas y Distribución por Género -->
@@ -322,13 +361,34 @@
         <div>
           <span class="text-[10px] uppercase font-bold tracking-wider text-blue-300">Cuenta Privada de Jhordy</span>
           <h2 class="text-xl sm:text-2xl font-black">Finanzas Personales</h2>
-          <p class="text-xs text-blue-200 mt-0.5">Control de ingresos propios, sueldos y gastos del hogar separados del local de ropa.</p>
+          <p class="text-xs text-blue-200 mt-0.5">Control de ingresos propios, sueldos, trabajos extras y gastos del hogar separados del local de ropa.</p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
+          <!-- Filtro de Mes y Año para Personal -->
+          <div class="flex items-center gap-1 bg-blue-950/90 border border-blue-400/40 px-2.5 py-1.5 rounded-2xl text-xs">
+            <span class="text-blue-300 font-bold">Filtro:</span>
+            <select id="selectPersonalYear" onchange="renderPersonalTransactions()" class="bg-blue-900 text-white text-xs font-bold rounded-lg px-1.5 py-0.5 border border-blue-700 outline-none">
+              <option value="all">Todo Año</option>
+              <option value="2026" selected>2026</option>
+              <option value="2025">2025</option>
+            </select>
+            <select id="selectPersonalMonth" onchange="renderPersonalTransactions()" class="bg-blue-900 text-white text-xs font-bold rounded-lg px-1.5 py-0.5 border border-blue-700 outline-none">
+              <option value="all">Todo el Año</option>
+              <option value="1">Ene</option><option value="2">Feb</option><option value="3">Mar</option>
+              <option value="4">Abr</option><option value="5">May</option><option value="6">Jun</option>
+              <option value="7">Jul</option><option value="8">Ago</option><option value="9" selected>Sep</option>
+              <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option>
+            </select>
+          </div>
+
+          <button onclick="openModalExtraIncome('personal')" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>+ Ingreso Extra</span>
+          </button>
           <button onclick="openModalUniversalIncome('personal')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>+ Ingreso Personal</span>
+            <span>+ Sueldo / Ingreso</span>
           </button>
           <button onclick="openModalUniversalExpense('personal')" class="bg-rose-500 hover:bg-rose-400 text-white font-bold px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
             <i data-lucide="minus" class="w-3.5 h-3.5"></i>
@@ -338,11 +398,16 @@
       </div>
 
       <!-- MINI-DASHBOARD DE DINERO PERSONAL -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
-          <span class="text-[10px] font-black uppercase text-emerald-600 block">Total Ingresos Personales</span>
+          <span class="text-[10px] font-black uppercase text-emerald-600 block">Ingresos Regulares</span>
           <span id="personalMiniIncome" class="font-mono text-xl font-black text-emerald-600 block mt-1">$0.00</span>
-          <span class="text-[10px] text-slate-400 mt-0.5 block">Sueldos y extras cobrados</span>
+          <span class="text-[10px] text-slate-400 mt-0.5 block">Sueldos y honorarios</span>
+        </div>
+        <div class="bg-white p-4 rounded-3xl border border-amber-300 bg-amber-50/50 shadow-sm">
+          <span class="text-[10px] font-black uppercase text-amber-800 block">✨ Ingresos Extras Personal</span>
+          <span id="personalMiniExtraIncome" class="font-mono text-xl font-black text-amber-700 block mt-1">$0.00</span>
+          <span class="text-[10px] text-amber-900/80 mt-0.5 block">Otros trabajos, cachuelos y extras</span>
         </div>
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
           <span class="text-[10px] font-black uppercase text-rose-600 block">Total Gastos Personales</span>
@@ -392,6 +457,10 @@
           </div>
 
           <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openModalExtraIncome('boutique')" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-1.5 rounded-xl text-xs shadow flex items-center gap-1 transition">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>+ Ingreso Extra Tienda</span>
+            </button>
             <button onclick="openModalUniversalIncome('boutique')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow flex items-center gap-1 transition">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>+ Ingreso Tienda</span>
@@ -412,7 +481,7 @@
       </div>
 
       <!-- MINI-DASHBOARD DENTRO DE BOUTIQUE -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
           <span class="text-[10px] font-black uppercase text-purple-600 block">Caja de la Boutique</span>
           <span id="boutiqueMiniCash" class="font-mono text-xl font-black text-purple-600 block mt-1">$0.00</span>
@@ -422,6 +491,11 @@
           <span class="text-[10px] font-black uppercase text-emerald-600 block">Ventas Totales Cobradas</span>
           <span id="boutiqueMiniTotalSales" class="font-mono text-xl font-black text-emerald-600 block mt-1">$0.00</span>
           <span class="text-[10px] text-slate-400 mt-0.5 block">Ingresos brutos por prendas</span>
+        </div>
+        <div class="bg-white p-4 rounded-3xl border border-amber-300 bg-amber-50/40 shadow-sm">
+          <span class="text-[10px] font-black uppercase text-amber-800 block">✨ Ingresos Extras Tienda</span>
+          <span id="boutiqueMiniExtraIncome" class="font-mono text-xl font-black text-amber-700 block mt-1">$0.00</span>
+          <span class="text-[10px] text-amber-900/80 mt-0.5 block">Arreglos, servicios y extras</span>
         </div>
         <div class="bg-white p-4 rounded-3xl border border-emerald-300 bg-emerald-50/40 shadow-sm">
           <span class="text-[10px] font-black uppercase text-emerald-700 block">Dinero Recuperado (Reinvertir)</span>
@@ -561,7 +635,7 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- 4. PESTAÑA: DEUDAS CONTROL (PERSONAL Y BOUTIQUE)               -->
+    <!-- 4. PESTAÑA: DEUDAS CONTROL (PERSONAL Y BOUTIQUE)                -->
     <!-- ============================================================== -->
     <section id="tabDebtsControl" class="tab-content hidden space-y-6">
 
@@ -880,10 +954,6 @@
     </div>
   </footer>
 
-  <!-- ============================================================== -->
-  <!-- MODALES DE OPERACIONES Y GESTIÓN                               -->
-  <!-- ============================================================== -->
-
   <!-- MODAL: NUEVA PRENDA (SIN TALLAS NI COLORES, SOLO GÉNERO) -->
   <div id="modalNewProduct" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
     <div class="bg-white rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4 border border-slate-200">
@@ -1162,6 +1232,54 @@
         <div class="pt-2 flex justify-end gap-2">
           <button type="button" onclick="closeModal('modalUniversalIncome')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
           <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold shadow">Guardar Ingreso</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR INGRESO EXTRA (TRABAJOS EXTRAS, COMISIONES, SERVICIOS) -->
+  <div id="modalExtraIncome" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-amber-300">
+      <div class="flex items-center justify-between border-b border-amber-100 pb-3">
+        <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+          <span class="text-amber-500 text-lg">✨</span>
+          <span id="extraIncomeModalTitle">Registrar Ingreso Extra</span>
+        </h3>
+        <button onclick="closeModal('modalExtraIncome')" class="text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="saveExtraIncome(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-black text-slate-700 mb-1">¿A qué cuenta pertenece este ingreso extra?</label>
+          <select id="extraIncomeAccountSelect" class="w-full px-3 py-2 rounded-xl border border-amber-300 font-bold bg-amber-50/50">
+            <option value="personal">💳 Finanzas Personales (Otro trabajo, cachuelo, comisión)</option>
+            <option value="boutique">🛍️ Boutique Jhordy (Servicios de costura, ventas especiales, etc.)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha</label>
+            <input type="date" id="extraIncomeDate" required class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Monto Ganado ($ USD)</label>
+            <input type="number" step="0.01" min="0.01" id="extraIncomeAmount" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-amber-400 font-mono font-black text-base text-amber-900 bg-amber-50/30">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Concepto / Actividad Extra Realizada</label>
+          <input type="text" id="extraIncomeDetail" required placeholder="Ej. Trabajo extra de fin de semana, asesoría, comisión especial..." class="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold">
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200 text-[11px] leading-tight">
+          💡 <b>Nota:</b> Este monto se sumará al saldo disponible y aparecerá en las tarjetas de <b>Ingresos Extras</b> del Dashboard y de tu cuenta para que puedas filtrarlo por mes o por todo el año.
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modalExtraIncome')" class="px-4 py-2 font-bold text-slate-500">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow transition active:scale-95">Guardar Ingreso Extra</button>
         </div>
       </form>
     </div>
@@ -1502,9 +1620,9 @@
       // CATEGORÍAS EXCLUSIVAS PARA DINERO (INGRESOS Y EGRESOS)
       categories: {
         boutiqueExpense: ["Compra de Mercadería (Ropa)", "Alquiler del Local", "Fundas y Empaques", "Fletes y Transporte", "Servicios Básicos (Luz/Internet)", "Publicidad y Redes", "Pago de Deuda Boutique", "Otros Gastos Boutique"],
-        boutiqueIncome: ["Venta de Ropa en Tienda", "Aporte de Capital", "Transferencias Recibidas", "Otros Ingresos Boutique"],
+        boutiqueIncome: ["Venta de Ropa en Tienda", "Ingreso Extra ✨", "Aporte de Capital", "Transferencias Recibidas", "Otros Ingresos Boutique"],
         personalExpense: ["Alimentación / Supermercado", "Vivienda / Arriendo Hogar", "Transporte Propio", "Salud / Farmacia", "Educación", "Cuota de Deuda", "Ocio / Varios"],
-        personalIncome: ["Sueldo / Salario", "Comisiones", "Honorarios", "Otros Ingresos"]
+        personalIncome: ["Sueldo / Salario", "Ingreso Extra ✨", "Comisiones", "Honorarios", "Otros Ingresos"]
       },
       // PRENDAS SIN TALLAS NI COLORES: SOLO GÉNERO
       products: [
@@ -1572,27 +1690,56 @@
     }
 
     function calculateFinances() {
+      // Filtros de fecha del Dashboard General
+      const dYear = document.getElementById('dashYearFilter')?.value || 'all';
+      const dMonth = document.getElementById('dashMonthFilter')?.value || 'all';
+
+      const filterByDate = (itemDate) => {
+        if (!itemDate) return true;
+        const parts = itemDate.split('-');
+        if (parts.length < 2) return true;
+        const y = parts[0];
+        const m = parts[1];
+        if (dYear !== 'all' && y !== dYear) return false;
+        if (dMonth !== 'all' && m !== dMonth) return false;
+        return true;
+      };
+
       // 1. Ingresos Boutique: Ventas de ropa + ingresos manuales
-      const salesIncome = (appState.sales || []).reduce((sum, s) => sum + Number(s.total || 0), 0);
-      const boutiqueManualIncome = (appState.boutiqueTransactions || []).filter(t => t.type === 'ingreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const filteredSales = (appState.sales || []).filter(s => filterByDate(s.date));
+      const salesIncome = filteredSales.reduce((sum, s) => sum + Number(s.total || 0), 0);
+      
+      const filteredBoutiqueTxs = (appState.boutiqueTransactions || []).filter(t => filterByDate(t.date));
+      const boutiqueManualIncome = filteredBoutiqueTxs.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
       const boutiqueTotalIncome = salesIncome + boutiqueManualIncome;
 
-      // 2. Egresos Boutique: Gastos operativos del local
-      const boutiqueTotalExpenses = (appState.boutiqueTransactions || []).filter(t => t.type === 'egreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      // Ingresos Extras de Boutique
+      const boutiqueExtraIncome = filteredBoutiqueTxs.filter(t => t.type === 'ingreso' && t.isExtra).reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-      // 3. Transferencias intercuentas
-      const transferredToPersonal = (appState.transfers || []).filter(t => t.to === 'personal').reduce((sum, t) => sum + Number(t.amount || 0), 0);
-      const transferredFromPersonal = (appState.transfers || []).filter(t => t.from === 'personal').reduce((sum, t) => sum + Number(t.amount || 0), 0);
-      const transferredToBoutique = (appState.transfers || []).filter(t => t.to === 'boutique').reduce((sum, t) => sum + Number(t.amount || 0), 0);
-      const transferredFromBoutique = (appState.transfers || []).filter(t => t.from === 'boutique').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      // 2. Egresos Boutique: Gastos operativos del local
+      const boutiqueTotalExpenses = filteredBoutiqueTxs.filter(t => t.type === 'egreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+      // 3. Transferencias intercuentas filtradas
+      const filteredTransfers = (appState.transfers || []).filter(t => filterByDate(t.date));
+      const transferredToPersonal = filteredTransfers.filter(t => t.to === 'personal').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const transferredFromPersonal = filteredTransfers.filter(t => t.from === 'personal').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const transferredToBoutique = filteredTransfers.filter(t => t.to === 'boutique').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const transferredFromBoutique = filteredTransfers.filter(t => t.from === 'boutique').reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
       // 4. Caja neta de la Boutique
       const boutiqueFinalBalance = (boutiqueTotalIncome + transferredToBoutique) - (boutiqueTotalExpenses + transferredFromBoutique);
 
-      // 5. Finanzas Personales
-      const personalIncomeTotal = (appState.personalTransactions || []).filter(t => t.type === 'ingreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
-      const personalExpenseTotal = (appState.personalTransactions || []).filter(t => t.type === 'egreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      // 5. Finanzas Personales filtradas
+      const filteredPersonalTxs = (appState.personalTransactions || []).filter(t => filterByDate(t.date));
+      const personalIncomeTotal = filteredPersonalTxs.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+      const personalExpenseTotal = filteredPersonalTxs.filter(t => t.type === 'egreso').reduce((sum, t) => sum + Number(t.amount || 0), 0);
       const personalFinalBalance = (personalIncomeTotal + transferredToPersonal) - (personalExpenseTotal + transferredFromPersonal);
+
+      // Ingresos Extras Personales
+      const personalExtraIncome = filteredPersonalTxs.filter(t => t.type === 'ingreso' && t.isExtra).reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+      // Total Ingresos Extras Consolidados en Dashboard
+      const consolidatedExtraIncome = personalExtraIncome + boutiqueExtraIncome;
 
       // 6. Métricas de Mercadería e Inversión
       let totalUnitsStock = 0;
@@ -1604,16 +1751,19 @@
       });
 
       // 7. Dinero Recuperado listo para reinvertir en mercadería
-      const totalRecoveredCapital = (appState.sales || []).reduce((sum, s) => sum + Number(s.costBase || 0), 0);
-      const totalNetProfit = (appState.sales || []).reduce((sum, s) => sum + Number(s.netProfit || 0), 0);
+      const totalRecoveredCapital = filteredSales.reduce((sum, s) => sum + Number(s.costBase || 0), 0);
+      const totalNetProfit = filteredSales.reduce((sum, s) => sum + Number(s.netProfit || 0), 0);
 
       return {
         boutiqueFinalBalance,
         personalFinalBalance,
         boutiqueTotalIncome,
         boutiqueTotalExpenses,
+        boutiqueExtraIncome,
         personalIncomeTotal,
         personalExpenseTotal,
+        personalExtraIncome,
+        consolidatedExtraIncome,
         salesIncome,
         totalUnitsStock,
         totalCapitalInStock,
@@ -1646,15 +1796,19 @@
       document.getElementById('kpiRecoveredCapital').textContent = `$${f.totalRecoveredCapital.toFixed(2)}`;
       document.getElementById('kpiCapitalInventory').textContent = `$${f.totalCapitalInStock.toFixed(2)}`;
       document.getElementById('kpiTotalUnitsStock').textContent = f.totalUnitsStock.toLocaleString();
+      document.getElementById('kpiTotalExtraIncome').textContent = `$${f.consolidatedExtraIncome.toFixed(2)}`;
 
       // MINI-DASHBOARD PERSONAL
-      document.getElementById('personalMiniIncome').textContent = `$${f.personalIncomeTotal.toFixed(2)}`;
+      const regularPersonalIncome = Math.max(0, f.personalIncomeTotal - f.personalExtraIncome);
+      document.getElementById('personalMiniIncome').textContent = `$${regularPersonalIncome.toFixed(2)}`;
+      document.getElementById('personalMiniExtraIncome').textContent = `$${f.personalExtraIncome.toFixed(2)}`;
       document.getElementById('personalMiniExpense').textContent = `$${f.personalExpenseTotal.toFixed(2)}`;
       document.getElementById('personalMiniBalance').textContent = `$${f.personalFinalBalance.toFixed(2)}`;
 
       // MINI-DASHBOARD BOUTIQUE
       document.getElementById('boutiqueMiniCash').textContent = `$${f.boutiqueFinalBalance.toFixed(2)}`;
       document.getElementById('boutiqueMiniTotalSales').textContent = `$${f.salesIncome.toFixed(2)}`;
+      document.getElementById('boutiqueMiniExtraIncome').textContent = `$${f.boutiqueExtraIncome.toFixed(2)}`;
       document.getElementById('boutiqueMiniRecovered').textContent = `$${f.totalRecoveredCapital.toFixed(2)}`;
       document.getElementById('boutiqueMiniCapital').textContent = `$${f.totalCapitalInStock.toFixed(2)}`;
 
@@ -1668,6 +1822,44 @@
       renderInvoiceUI();
       updateCharts();
       if (window.lucide) lucide.createIcons();
+    }
+
+    function openModalExtraIncome(account = 'personal') {
+      document.getElementById('extraIncomeAccountSelect').value = account;
+      document.getElementById('extraIncomeDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('extraIncomeAmount').value = '';
+      document.getElementById('extraIncomeDetail').value = '';
+      document.getElementById('extraIncomeModalTitle').textContent = account === 'boutique' ? 'Registrar Ingreso Extra (Boutique)' : 'Registrar Ingreso Extra (Personal)';
+      document.getElementById('modalExtraIncome').classList.remove('hidden');
+    }
+
+    function saveExtraIncome(e) {
+      e.preventDefault();
+      const account = document.getElementById('extraIncomeAccountSelect').value;
+      const date = document.getElementById('extraIncomeDate').value;
+      const amount = parseFloat(document.getElementById('extraIncomeAmount').value) || 0;
+      const detail = document.getElementById('extraIncomeDetail').value.trim();
+
+      const item = {
+        id: (account === 'boutique' ? 'bt_ex_' : 'pt_ex_') + Date.now(),
+        date,
+        type: 'ingreso',
+        category: 'Ingreso Extra ✨',
+        detail: detail + ' (Extra)',
+        amount,
+        isExtra: true
+      };
+
+      if (account === 'boutique') {
+        appState.boutiqueTransactions.push(item);
+      } else {
+        appState.personalTransactions.push(item);
+      }
+
+      saveState();
+      closeModal('modalExtraIncome');
+      if (window.confetti) confetti({ particleCount: 50, spread: 60 });
+      showToast(`¡Ingreso extra de $${amount.toFixed(2)} registrado con éxito!`, "✨");
     }
 
     function filterInventoryByGender(gender) {
@@ -1994,8 +2186,8 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="py-2.5 px-2 font-mono text-slate-500">${item.date}</td>
-          <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.type === 'ingreso' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${item.type.toUpperCase()}</span></td>
-          <td class="py-2.5 px-2 font-bold text-slate-700">${item.category}</td>
+          <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.type === 'ingreso' ? (item.isExtra ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800') : 'bg-rose-100 text-rose-800'}">${item.isExtra ? 'EXTRA ✨' : item.type.toUpperCase()}</span></td>
+          <td class="py-2.5 px-2 font-bold ${item.isExtra ? 'text-amber-800' : 'text-slate-700'}">${item.category}</td>
           <td class="py-2.5 px-2 text-slate-600">${item.detail}</td>
           <td class="py-2.5 px-2 text-right font-mono font-bold ${item.type === 'ingreso' ? 'text-emerald-700' : 'text-rose-700'}">${item.type === 'ingreso' ? '+' : '-'}$${Number(item.amount).toFixed(2)}</td>
           <td class="py-2.5 px-2 text-right">
@@ -2004,6 +2196,7 @@
         `;
         tbody.appendChild(tr);
       });
+      lucide.createIcons();
     }
 
     function deleteBoutiqueTransaction(id) {
@@ -2015,12 +2208,24 @@
     function renderPersonalTransactions() {
       const tbody = document.getElementById('personalTransactionsTableBody');
       tbody.innerHTML = '';
-      [...(appState.personalTransactions || [])].reverse().forEach(t => {
+
+      const pYear = document.getElementById('selectPersonalYear')?.value || 'all';
+      const pMonth = document.getElementById('selectPersonalMonth')?.value || 'all';
+
+      const filtered = (appState.personalTransactions || []).filter(t => {
+        if (!t.date) return true;
+        const parts = t.date.split('-');
+        if (pYear !== 'all' && parts[0] !== pYear) return false;
+        if (pMonth !== 'all' && parseInt(parts[1], 10) !== parseInt(pMonth, 10)) return false;
+        return true;
+      });
+
+      [...filtered].reverse().forEach(t => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="py-2.5 px-2 font-mono text-slate-500">${t.date}</td>
-          <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.type === 'ingreso' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${t.type.toUpperCase()}</span></td>
-          <td class="py-2.5 px-2 font-bold text-slate-700">${t.category}</td>
+          <td class="py-2.5 px-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.type === 'ingreso' ? (t.isExtra ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800') : 'bg-rose-100 text-rose-800'}">${t.isExtra ? 'EXTRA ✨' : t.type.toUpperCase()}</span></td>
+          <td class="py-2.5 px-2 font-bold ${t.isExtra ? 'text-amber-800' : 'text-slate-700'}">${t.category}</td>
           <td class="py-2.5 px-2 text-slate-600">${t.detail}</td>
           <td class="py-2.5 px-2 text-right font-mono font-bold ${itemColor(t.type)}">${t.type === 'ingreso' ? '+' : '-'}$${Number(t.amount).toFixed(2)}</td>
           <td class="py-2.5 px-2 text-right">
@@ -2029,6 +2234,7 @@
         `;
         tbody.appendChild(tr);
       });
+      lucide.createIcons();
     }
 
     function itemColor(type) {
@@ -2237,6 +2443,7 @@
         `;
         container.appendChild(div);
       });
+      lucide.createIcons();
     }
 
     function openModalAddCategory(groupKey) {
@@ -2541,7 +2748,7 @@
       a.remove();
 
       const f = calculateFinances();
-      const summary = `*RESPALDO ${appState.settings.storeName}*\nFecha: ${new Date().toLocaleDateString()}\nPropietario: ${appState.settings.ownerName}\nCaja Boutique: $${f.boutiqueFinalBalance.toFixed(2)}\nSaldo Personal: $${f.personalFinalBalance.toFixed(2)}\nDinero Recuperado (Reinvertir): $${f.totalRecoveredCapital.toFixed(2)}\nPrendas en Stock: ${f.totalUnitsStock.toLocaleString()}\nUbicación: Tupigachi - Ecuador 🇪🇨\n(Archivo .json descargado en tu dispositivo para respaldo seguro)`;
+      const summary = `*RESPALDO ${appState.settings.storeName}*\nFecha: ${new Date().toLocaleDateString()}\nPropietario: ${appState.settings.ownerName}\nCaja Boutique: $${f.boutiqueFinalBalance.toFixed(2)}\nSaldo Personal: $${f.personalFinalBalance.toFixed(2)}\nIngresos Extras: $${f.consolidatedExtraIncome.toFixed(2)}\nDinero Recuperado (Reinvertir): $${f.totalRecoveredCapital.toFixed(2)}\nPrendas en Stock: ${f.totalUnitsStock.toLocaleString()}\nUbicación: Tupigachi - Ecuador 🇪🇨\n(Archivo .json descargado en tu dispositivo para respaldo seguro)`;
 
       window.open(`https://wa.me/593963923399?text=${encodeURIComponent(summary)}`, '_blank');
       showToast("Archivo JSON descargado y WhatsApp abierto", "📲");
