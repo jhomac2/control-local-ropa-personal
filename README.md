@@ -86,4 +86,4 @@ Desarrollado por Jhordy (I´m_Jhordy) desde Sangolquí, Pichincha, Ecuador 🇪�
 
 🐙 GitHub: github.com/By_Jhordy
 
-🎵 TikTok: @I_m_Jhordy
+🎵 TikTok: @Mr_Jhordy
