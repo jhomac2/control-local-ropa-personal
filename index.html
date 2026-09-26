@@ -2,7 +2,7 @@
 <html lang="es" class="h-full bg-slate-50 text-slate-800">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#020617">
   <meta name="description" content="Boutique Jhordy & Finanzas Personales — Sistema de Ropa y Contabilidad">
   <title>Boutique Jhordy & Finanzas Personales — Tupigachi</title>
@@ -14,6 +14,9 @@
       darkMode: 'class',
       theme: {
         extend: {
+          screens: {
+            'xs': '420px'
+          },
           colors: {
             boutique: {
               50: '#faf5ff',
@@ -45,10 +48,15 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
+      overflow-x: hidden;
     }
     .font-mono {
       font-family: 'JetBrains Mono', monospace;
@@ -82,7 +90,7 @@
       .no-print { display: none !important; }
     }
 
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.05); }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     html.dark ::-webkit-scrollbar-thumb { background: #475569; }
@@ -90,14 +98,14 @@
   </style>
 </head>
 
-<body class="min-h-full flex flex-col antialiased selection:bg-purple-600 selection:text-white pb-24 md:pb-0">
+<body class="min-h-full flex flex-col antialiased selection:bg-purple-600 selection:text-white pb-28 md:pb-8">
 
   <!-- AVISO DE ESTADO OFFLINE BLINDADO -->
   <div id="offlineReadyBadge" class="hidden bg-emerald-500/20 border-b border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-center py-1 text-[11px] font-bold no-print">
     <span>🛡️ Modo sin conexión 100% activo: Funciona en tu boutique en Tupigachi sin internet.</span>
   </div>
 
-  <!-- Toast de Notificaciones -->
+  <!-- Toast de Notificaciones Flotante -->
   <div id="toastNotification" class="fixed top-4 right-4 z-50 transform transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
     <div class="bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-bold">
       <span id="toastIcon" class="text-base">✅</span>
@@ -105,105 +113,102 @@
     </div>
   </div>
 
-  <!-- Encabezado Superior -->
+  <!-- Encabezado Superior Totalmente Responsivo para Móviles -->
   <header class="no-print bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
 
-      <!-- Logo, Nombre de la Boutique y BOTÓN FIJO DE WHATSAPP -->
-      <div class="flex items-center gap-2.5 min-w-0">
-        <div id="navHeaderLogoContainer" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-amber-500 flex-shrink-0 flex items-center justify-center font-black text-white text-base sm:text-lg shadow-sm overflow-hidden border border-white/20">
-          <span id="navHeaderLogoEmoji">🛍️</span>
-          <img id="navHeaderLogoImg" src="" alt="Logo" class="w-full h-full object-cover hidden">
-        </div>
-        <div class="truncate">
-          <div class="flex items-center gap-1.5 truncate">
-            <h1 class="font-extrabold text-xs sm:text-base tracking-tight text-white flex items-center gap-1 truncate">
-              <span id="headerStoreName" class="truncate">BOUTIQUE JHORDY</span>
-              <span class="text-slate-500 font-normal text-[11px]">|</span>
-              <span id="headerOwnerName" class="text-[11px] sm:text-xs text-purple-300 font-semibold truncate">Jhordy</span>
-            </h1>
+      <!-- Logo, Nombre de la Boutique y BOTÓN SOLICITADO: "Presiona aquí para hacer respaldo" -->
+      <div class="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
+        <div class="flex items-center gap-2 min-w-0">
+          <div id="navHeaderLogoContainer" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-500 to-amber-500 flex-shrink-0 flex items-center justify-center font-black text-white text-base sm:text-lg shadow-sm overflow-hidden border border-white/20">
+            <span id="navHeaderLogoEmoji">🛍️</span>
+            <img id="navHeaderLogoImg" src="" alt="Logo" class="w-full h-full object-cover hidden">
           </div>
-          <p class="text-[10px] text-slate-400 hidden sm:block">Tienda de Ropa & Finanzas Personales — Tupigachi</p>
+          <div class="truncate">
+            <div class="flex items-center gap-1.5 truncate">
+              <h1 class="font-extrabold text-xs sm:text-base tracking-tight text-white flex items-center gap-1 truncate">
+                <span id="headerStoreName" class="truncate">BOUTIQUE JHORDY</span>
+                <span class="text-slate-500 font-normal text-[11px]">|</span>
+                <span id="headerOwnerName" class="text-[11px] sm:text-xs text-purple-300 font-semibold truncate">Jhordy</span>
+              </h1>
+            </div>
+            <p class="text-[10px] text-slate-400 hidden xs:block">Tienda de Ropa & Finanzas — Tupigachi</p>
+          </div>
         </div>
 
-        <!-- BOTÓN FIJO DE RESPALDO A WHATSAPP -->
-        <button onclick="shareBackupDataWhatsApp()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs shadow-md transition active:scale-95 flex items-center gap-1 flex-shrink-0 ml-1 border border-amber-300" title="Descargar copia JSON y compartir a tu WhatsApp">
-          <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-          <span class="hidden xs:inline">📲 Respaldar en WhatsApp</span>
-          <span class="xs:hidden">WhatsApp</span>
+        <!-- BOTÓN FIJO DE RESPALDO A WHATSAPP: TEXTO EXACTO Y RESPONSIVO -->
+        <button onclick="shareBackupDataWhatsApp()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-[10px] sm:text-xs shadow-md transition active:scale-95 flex items-center gap-1.5 flex-shrink-0 border border-emerald-400/40" title="Descargar copia JSON y enviar respaldo a WhatsApp">
+          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
+            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.587 1.849.914 3.011.914 3.181 0 5.767-2.586 5.768-5.766.001-3.182-2.585-5.768-5.768-5.768zm0-1.844c4.2 0 7.612 3.412 7.613 7.612 0 4.201-3.413 7.612-7.613 7.612-1.352 0-2.616-.354-3.711-.971l-5.32 1.393 1.423-5.187c-.672-1.127-1.042-2.434-1.042-3.847 0-4.2 3.412-7.612 7.612-7.612z"/>
+          </svg>
+          <span class="whitespace-nowrap">Presiona aquí para hacer respaldo</span>
         </button>
       </div>
 
-      <!-- Balances en Vivo y Controles -->
-      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+      <!-- Balances en Vivo y Acciones de Cabecera -->
+      <div class="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
         <!-- Badge Saldo Personal -->
-        <div class="flex items-center gap-1.5 bg-blue-950/80 border border-blue-500/30 px-2 sm:px-3 py-1 rounded-xl text-xs cursor-pointer hover:bg-blue-900/60 transition" onclick="switchMainTab('tabPersonal')" title="Ver Finanzas Personales">
+        <div class="flex items-center gap-1.5 bg-blue-950/80 border border-blue-500/30 px-2 sm:px-3 py-1 rounded-xl text-xs cursor-pointer hover:bg-blue-900/60 transition flex-1 sm:flex-initial" onclick="switchMainTab('tabPersonal')" title="Ver Finanzas Personales">
           <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
-          <div>
-            <span class="text-[8px] sm:text-[9px] text-blue-300 font-semibold block leading-tight hidden xs:inline">Personal</span>
-            <span id="badgePersonalBalance" class="font-mono font-bold text-white text-[11px] sm:text-sm">$0.00</span>
+          <div class="truncate">
+            <span class="text-[8px] sm:text-[9px] text-blue-300 font-semibold block leading-tight">Personal</span>
+            <span id="badgePersonalBalance" class="font-mono font-bold text-white text-[11px] sm:text-xs">$0.00</span>
           </div>
         </div>
 
         <!-- Badge Saldo Negocio (Boutique) -->
-        <div class="flex items-center gap-1.5 bg-purple-950/80 border border-purple-500/30 px-2 sm:px-3 py-1 rounded-xl text-xs cursor-pointer hover:bg-purple-900/60 transition" onclick="switchMainTab('tabBusiness')" title="Ver Caja de Boutique">
+        <div class="flex items-center gap-1.5 bg-purple-950/80 border border-purple-500/30 px-2 sm:px-3 py-1 rounded-xl text-xs cursor-pointer hover:bg-purple-900/60 transition flex-1 sm:flex-initial" onclick="switchMainTab('tabBusiness')" title="Ver Caja de Boutique">
           <div class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></div>
-          <div>
-            <span id="badgeBusinessLabel" class="text-[8px] sm:text-[9px] text-purple-300 font-semibold block leading-tight hidden xs:inline">Boutique</span>
-            <span id="badgeBusinessBalance" class="font-mono font-bold text-white text-[11px] sm:text-sm">$0.00</span>
+          <div class="truncate">
+            <span id="badgeBusinessLabel" class="text-[8px] sm:text-[9px] text-purple-300 font-semibold block leading-tight">Boutique</span>
+            <span id="badgeBusinessBalance" class="font-mono font-bold text-white text-[11px] sm:text-xs">$0.00</span>
           </div>
         </div>
 
         <!-- Botón Modo Claro / Oscuro -->
-        <button onclick="toggleTheme()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition" title="Modo Claro/Oscuro">
+        <button onclick="toggleTheme()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition active:scale-95 shrink-0" title="Modo Claro/Oscuro">
           <i data-lucide="sun" id="iconThemeSun" class="w-3.5 h-3.5 hidden"></i>
           <i data-lucide="moon" id="iconThemeMoon" class="w-3.5 h-3.5"></i>
         </button>
 
         <!-- Botón Ajustes -->
-        <button onclick="openModalSettings()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 p-1.5 rounded-xl transition" title="Configuración, Logo y Respaldos">
+        <button onclick="openModalSettings()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 p-1.5 rounded-xl transition shrink-0" title="Configuración, Logo y Respaldos">
           <i data-lucide="settings" class="w-3.5 h-3.5"></i>
         </button>
       </div>
     </div>
 
-    <!-- BARRA DE ACCESO RÁPIDO: EXACTAMENTE LAS 6 SECCIONES SOLICITADAS -->
+    <!-- BARRA DE ACCESO RÁPIDO ESCRITORIO: EXACTAMENTE LAS 6 SECCIONES -->
     <nav class="hidden md:block bg-slate-950 border-t border-slate-800 px-3 sm:px-6">
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-1 overflow-x-auto py-1 text-xs">
         <div class="flex items-center gap-1">
-          <!-- 1. Dashboard -->
-          <button onclick="switchMainTab('tabDashboard')" id="navTabDashboard" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-white bg-slate-800 flex items-center gap-1.5 transition">
+          <button onclick="switchMainTab('tabDashboard')" id="navTabDashboard" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-white bg-slate-800 flex items-center gap-1.5 transition whitespace-nowrap">
             <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-purple-400"></i>
             <span>Dashboard</span>
           </button>
-          <!-- 2. Personal -->
-          <button onclick="switchMainTab('tabPersonal')" id="navTabPersonal" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition">
+          <button onclick="switchMainTab('tabPersonal')" id="navTabPersonal" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
             <i data-lucide="wallet" class="w-3.5 h-3.5 text-blue-400"></i>
             <span>Personal</span>
           </button>
-          <!-- 3. Negocio (Boutique Jhordy) -->
-          <button onclick="switchMainTab('tabBusiness')" id="navTabBusiness" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition">
+          <button onclick="switchMainTab('tabBusiness')" id="navTabBusiness" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
             <i data-lucide="shirt" class="w-3.5 h-3.5 text-purple-400"></i>
             <span id="navBusinessNameText">Boutique</span>
           </button>
-          <!-- 4. Deudas Control -->
-          <button onclick="switchMainTab('tabDebtsControl')" id="navTabDebtsControl" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition">
+          <button onclick="switchMainTab('tabDebtsControl')" id="navTabDebtsControl" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
             <i data-lucide="credit-card" class="w-3.5 h-3.5 text-rose-400"></i>
             <span>Deudas Control</span>
           </button>
-          <!-- 5. Categorías (Exclusivo para Dinero: Ingresos y Egresos) -->
-          <button onclick="switchMainTab('tabCategories')" id="navTabCategories" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition">
+          <button onclick="switchMainTab('tabCategories')" id="navTabCategories" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
             <i data-lucide="tags" class="w-3.5 h-3.5 text-emerald-400"></i>
             <span>Categorías</span>
           </button>
-          <!-- 6. Factura SRI -->
-          <button onclick="switchMainTab('tabInvoice')" id="navTabInvoice" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition">
+          <button onclick="switchMainTab('tabInvoice')" id="navTabInvoice" class="nav-tab px-3.5 py-2 rounded-lg font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-1.5 transition whitespace-nowrap">
             <i data-lucide="file-check-2" class="w-3.5 h-3.5 text-cyan-400"></i>
             <span>Factura SRI</span>
           </button>
         </div>
 
-        <button onclick="openModalTransfer()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow transition">
+        <button onclick="openModalTransfer()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow transition active:scale-95 shrink-0">
           <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
           <span>Traspaso Rápido</span>
         </button>
@@ -218,13 +223,13 @@
     <!-- ============================================================== -->
     <section id="tabDashboard" class="tab-content space-y-6">
       
-      <!-- Banner de Bienvenida -->
-      <div class="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white rounded-3xl p-5 sm:p-7 shadow-xl border border-slate-700/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <!-- Banner de Bienvenida con Filtros de Período e Ingreso Extra -->
+      <div class="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white rounded-3xl p-4 sm:p-7 shadow-xl border border-slate-700/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+          <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
             <span>●</span> Sistema Central de Ropa & Finanzas — Tupigachi
           </span>
-          <h2 class="text-xl sm:text-2xl font-black text-white mt-1">
+          <h2 class="text-lg sm:text-2xl font-black text-white mt-1">
             Bienvenido, <span id="dashOwnerName" class="text-purple-300">Jhordy</span>
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
@@ -234,7 +239,7 @@
 
         <div class="flex items-center gap-2 flex-wrap">
           <!-- Filtros de Período del Dashboard (Año y Mes) -->
-          <div class="flex items-center gap-1.5 bg-slate-800/90 border border-purple-500/30 px-3 py-1.5 rounded-2xl text-xs">
+          <div class="flex items-center gap-1.5 bg-slate-800/90 border border-purple-500/30 px-2.5 py-1.5 rounded-2xl text-xs flex-wrap xs:flex-nowrap">
             <span class="text-purple-300 font-bold">📅 Período:</span>
             <select id="dashYearFilter" onchange="refreshAllUI()" class="bg-slate-900 text-white font-bold rounded-lg px-2 py-1 outline-none text-xs border border-slate-700">
               <option value="all">Todos los Años</option>
@@ -259,92 +264,92 @@
             </select>
           </div>
 
-          <button onclick="openModalExtraIncome('personal')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-2.5 rounded-2xl text-xs font-black shadow flex items-center gap-1.5 transition">
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <button onclick="openModalExtraIncome('personal')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-2 rounded-2xl text-xs font-black shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
             <span>+ Ingreso Extra</span>
           </button>
-          <button onclick="openModalNewProduct()" class="bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow flex items-center gap-1.5 transition">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <button onclick="openModalNewProduct()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-2xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
             <span>+ Nueva Prenda</span>
           </button>
-          <button onclick="openModalSellProduct()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow flex items-center gap-1.5 transition">
-            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+          <button onclick="openModalSellProduct()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-2xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
             <span>+ Registrar Venta</span>
           </button>
         </div>
       </div>
 
-      <!-- TARJETAS PRINCIPALES (KPIS) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <!-- Caja Boutique -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+      <!-- TARJETAS PRINCIPALES (KPIS) RESPONSIVAS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <!-- 1. Caja Boutique -->
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase text-purple-600" id="dashKpiBusinessLabel">Caja Boutique</span>
-            <span class="text-lg">🛍️</span>
+            <span class="text-base sm:text-lg">🛍️</span>
           </div>
-          <span id="kpiBusinessBalance" class="font-mono text-2xl font-black text-purple-600 block mt-2">$0.00</span>
+          <span id="kpiBusinessBalance" class="font-mono text-xl sm:text-2xl font-black text-purple-600 block mt-1.5">$0.00</span>
           <p class="text-[11px] text-slate-500 mt-1">Ventas de ropa − Gastos tienda − Deudas</p>
         </div>
 
-        <!-- DINERO RECUPERADO (DISPONIBLE PARA REINVERTIR EN MERCADERÍA) -->
-        <div class="bg-gradient-to-br from-emerald-900 to-teal-950 text-white rounded-3xl p-5 border border-emerald-700/50 shadow-lg">
+        <!-- 2. DINERO RECUPERADO (DISPONIBLE PARA REINVERTIR EN MERCADERÍA) -->
+        <div class="bg-gradient-to-br from-emerald-900 to-teal-950 text-white rounded-3xl p-4 sm:p-5 border border-emerald-700/50 shadow-lg">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase text-emerald-300">Dinero Recuperado (Reinvertir)</span>
-            <span class="text-lg">♻️</span>
+            <span class="text-base sm:text-lg">♻️</span>
           </div>
-          <span id="kpiRecoveredCapital" class="font-mono text-2xl font-black text-emerald-300 block mt-2">$0.00</span>
+          <span id="kpiRecoveredCapital" class="font-mono text-xl sm:text-2xl font-black text-emerald-300 block mt-1.5">$0.00</span>
           <p class="text-[11px] text-emerald-200 mt-1">Costo base recuperado en ventas para comprar más ropa</p>
         </div>
 
-        <!-- Capital Invertido en Stock Activo -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+        <!-- 3. Capital Invertido en Stock Activo -->
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase text-slate-600">Capital en Mercadería</span>
-            <span class="text-lg">📦</span>
+            <span class="text-base sm:text-lg">📦</span>
           </div>
-          <span id="kpiCapitalInventory" class="font-mono text-2xl font-black text-slate-900 block mt-2">$0.00</span>
+          <span id="kpiCapitalInventory" class="font-mono text-xl sm:text-2xl font-black text-slate-900 block mt-1.5">$0.00</span>
           <p class="text-[11px] text-slate-500 mt-1"><span id="kpiTotalUnitsStock">0</span> prendas en stock activo</p>
         </div>
 
-        <!-- Saldo Personal -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+        <!-- 4. Saldo Personal -->
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase text-blue-600">Saldo Personal</span>
-            <span class="text-lg">💳</span>
+            <span class="text-base sm:text-lg">💳</span>
           </div>
-          <span id="kpiPersonalBalance" class="font-mono text-2xl font-black text-blue-600 block mt-2">$0.00</span>
+          <span id="kpiPersonalBalance" class="font-mono text-xl sm:text-2xl font-black text-blue-600 block mt-1.5">$0.00</span>
           <p class="text-[11px] text-slate-500 mt-1">Ingresos propios − Gastos hogar</p>
         </div>
 
-        <!-- KPI INGRESOS EXTRAS TOTALES (DASHBOARD) -->
-        <div class="bg-gradient-to-br from-amber-500 via-amber-600 to-orange-600 text-slate-950 rounded-3xl p-5 border border-amber-300 shadow-lg">
+        <!-- 5. KPI INGRESOS EXTRAS TOTALES (DASHBOARD) -->
+        <div class="bg-gradient-to-br from-amber-500 via-amber-600 to-orange-600 text-slate-950 rounded-3xl p-4 sm:p-5 border border-amber-300 shadow-lg">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-black uppercase text-amber-950">Ingresos Extras</span>
-            <span class="text-lg">✨</span>
+            <span class="text-base sm:text-lg">✨</span>
           </div>
-          <span id="kpiTotalExtraIncome" class="font-mono text-2xl font-black text-slate-950 block mt-2">$0.00</span>
+          <span id="kpiTotalExtraIncome" class="font-mono text-xl sm:text-2xl font-black text-slate-950 block mt-1.5">$0.00</span>
           <p class="text-[11px] text-amber-950 font-semibold mt-1">Trabajos extras, comisiones y otros ingresos</p>
         </div>
       </div>
 
       <!-- Gráficos de Ventas y Distribución por Género -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+        <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
           <h4 class="font-extrabold text-xs uppercase text-slate-600 flex items-center gap-1.5">
             <i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-600"></i>
             <span>Ventas Mensuales de Ropa ($ USD)</span>
           </h4>
-          <div class="h-64">
+          <div class="h-60 sm:h-64">
             <canvas id="chartSalesMonthly"></canvas>
           </div>
         </div>
 
-        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+        <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
           <h4 class="font-extrabold text-xs uppercase text-slate-600 flex items-center gap-1.5">
             <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-600"></i>
             <span>Distribución de Prendas por Género</span>
           </h4>
-          <div class="h-64 flex items-center justify-center">
+          <div class="h-60 sm:h-64 flex items-center justify-center">
             <canvas id="chartGenderDistribution"></canvas>
           </div>
         </div>
@@ -357,7 +362,7 @@
     <section id="tabPersonal" class="tab-content hidden space-y-6">
       
       <!-- Encabezado de la Cuenta Privada -->
-      <div class="bg-blue-900 text-white p-5 rounded-3xl shadow-lg border border-blue-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="bg-blue-900 text-white p-4 sm:p-5 rounded-3xl shadow-lg border border-blue-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span class="text-[10px] uppercase font-bold tracking-wider text-blue-300">Cuenta Privada de Jhordy</span>
           <h2 class="text-xl sm:text-2xl font-black">Finanzas Personales</h2>
@@ -382,15 +387,15 @@
             </select>
           </div>
 
-          <button onclick="openModalExtraIncome('personal')" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
+          <button onclick="openModalExtraIncome('personal')" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
             <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
             <span>+ Ingreso Extra</span>
           </button>
-          <button onclick="openModalUniversalIncome('personal')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
+          <button onclick="openModalUniversalIncome('personal')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
             <span>+ Sueldo / Ingreso</span>
           </button>
-          <button onclick="openModalUniversalExpense('personal')" class="bg-rose-500 hover:bg-rose-400 text-white font-bold px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
+          <button onclick="openModalUniversalExpense('personal')" class="bg-rose-500 hover:bg-rose-400 text-white font-bold px-3 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition active:scale-95">
             <i data-lucide="minus" class="w-3.5 h-3.5"></i>
             <span>- Gasto Personal</span>
           </button>
@@ -398,7 +403,7 @@
       </div>
 
       <!-- MINI-DASHBOARD DE DINERO PERSONAL -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
           <span class="text-[10px] font-black uppercase text-emerald-600 block">Ingresos Regulares</span>
           <span id="personalMiniIncome" class="font-mono text-xl font-black text-emerald-600 block mt-1">$0.00</span>
@@ -422,10 +427,10 @@
       </div>
 
       <!-- Movimientos Personales -->
-      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+      <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
         <h4 class="font-extrabold text-sm text-slate-900">Historial de Ingresos y Gastos Personales</h4>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto -mx-1 sm:mx-0">
+          <table class="w-full text-left text-xs min-w-[500px]">
             <thead>
               <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
                 <th class="py-2 px-2">Fecha</th>
@@ -448,7 +453,7 @@
     <section id="tabBusiness" class="tab-content hidden space-y-6">
 
       <!-- Encabezado del Negocio y Submenú -->
-      <div class="bg-purple-950 text-white p-5 rounded-3xl shadow-lg border border-purple-900 space-y-4">
+      <div class="bg-purple-950 text-white p-4 sm:p-5 rounded-3xl shadow-lg border border-purple-900 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <span class="text-[10px] uppercase font-bold tracking-wider text-purple-300">Gestión Integral de la Tienda</span>
@@ -473,7 +478,7 @@
         </div>
 
         <!-- Sub-navegación dentro de Boutique -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-purple-900/80 text-xs">
+        <div class="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-purple-900/80 text-xs whitespace-nowrap">
           <button onclick="switchBusinessSubTab('subInventory')" id="bSubBtnInventory" class="bsub-btn px-3 py-1.5 rounded-xl font-bold bg-white text-purple-950 transition">👗 Inventario por Género</button>
           <button onclick="switchBusinessSubTab('subSales')" id="bSubBtnSales" class="bsub-btn px-3 py-1.5 rounded-xl font-bold text-purple-200 hover:bg-purple-900/60 transition">🛒 Registro de Ventas</button>
           <button onclick="switchBusinessSubTab('subCajaBoutique')" id="bSubBtnCajaBoutique" class="bsub-btn px-3 py-1.5 rounded-xl font-bold text-purple-200 hover:bg-purple-900/60 transition">💰 Caja & Gastos Local</button>
@@ -481,7 +486,7 @@
       </div>
 
       <!-- MINI-DASHBOARD DENTRO DE BOUTIQUE -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
           <span class="text-[10px] font-black uppercase text-purple-600 block">Caja de la Boutique</span>
           <span id="boutiqueMiniCash" class="font-mono text-xl font-black text-purple-600 block mt-1">$0.00</span>
@@ -537,7 +542,7 @@
         </div>
 
         <!-- Filtros por Género -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold whitespace-nowrap">
           <button onclick="filterInventoryByGender('all')" id="filterGenAll" class="gender-filter-btn px-3 py-1.5 rounded-xl bg-purple-600 text-white shadow">Todos (<span id="countGenAll">0</span>)</button>
           <button onclick="filterInventoryByGender('Hombre')" id="filterGenHombre" class="gender-filter-btn px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200">👨 Hombre (<span id="countGenHombre">0</span>)</button>
           <button onclick="filterInventoryByGender('Mujer')" id="filterGenMujer" class="gender-filter-btn px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200">👩 Mujer (<span id="countGenMujer">0</span>)</button>
@@ -547,8 +552,8 @@
         </div>
 
         <!-- Tabla de Inventario de Ropa -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm overflow-x-auto">
-          <table class="w-full text-left text-xs">
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm overflow-x-auto -mx-1 sm:mx-0">
+          <table class="w-full text-left text-xs min-w-[640px]">
             <thead>
               <tr class="bg-slate-50 text-slate-600 uppercase text-[10px] font-black border-y border-slate-200">
                 <th class="py-2.5 px-3">Código</th>
@@ -579,8 +584,8 @@
           </button>
         </div>
 
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm overflow-x-auto">
-          <table class="w-full text-left text-xs">
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm overflow-x-auto -mx-1 sm:mx-0">
+          <table class="w-full text-left text-xs min-w-[640px]">
             <thead>
               <tr class="bg-slate-50 text-slate-600 uppercase text-[10px] font-black border-y border-slate-200">
                 <th class="py-2.5 px-3">Fecha</th>
@@ -600,7 +605,7 @@
 
       <!-- SUB 3: CAJA & GASTOS BOUTIQUE -->
       <div id="subCajaBoutique" class="bsub-content hidden space-y-4">
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between">
             <h4 class="font-extrabold text-sm text-slate-900">Libro Contable de la Boutique</h4>
             <div class="flex items-center gap-2">
@@ -615,8 +620,8 @@
             </div>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+          <div class="overflow-x-auto -mx-1 sm:mx-0">
+            <table class="w-full text-left text-xs min-w-[500px]">
               <thead>
                 <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
                   <th class="py-2 px-2">Fecha</th>
@@ -639,7 +644,7 @@
     <!-- ============================================================== -->
     <section id="tabDebtsControl" class="tab-content hidden space-y-6">
 
-      <div class="bg-rose-950 text-white p-5 rounded-3xl shadow-lg border border-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="bg-rose-950 text-white p-4 sm:p-5 rounded-3xl shadow-lg border border-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span class="text-[10px] uppercase font-bold tracking-wider text-rose-300">Gestión de Créditos y Préstamos</span>
           <h2 class="text-xl sm:text-2xl font-black">Deudas Control</h2>
@@ -659,7 +664,7 @@
       </div>
 
       <!-- Deudas de la Boutique -->
-      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+      <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
         <h4 class="font-extrabold text-sm text-purple-900 flex items-center gap-2">
           <span>🛍️</span><span>Deudas de la Boutique (Proveedores, Mercadería a Crédito)</span>
         </h4>
@@ -667,7 +672,7 @@
       </div>
 
       <!-- Deudas Personales -->
-      <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+      <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
         <h4 class="font-extrabold text-sm text-blue-900 flex items-center gap-2">
           <span>💳</span><span>Deudas Personales (Tarjetas, Cooperativas, Préstamos)</span>
         </h4>
@@ -680,7 +685,7 @@
     <!-- ============================================================== -->
     <section id="tabCategories" class="tab-content hidden space-y-6">
 
-      <div class="bg-emerald-950 text-white p-5 rounded-3xl shadow-lg border border-emerald-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="bg-emerald-950 text-white p-4 sm:p-5 rounded-3xl shadow-lg border border-emerald-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-300">Padrón de Conceptos Financieros</span>
           <h2 class="text-xl sm:text-2xl font-black">Categorías de Dinero</h2>
@@ -691,7 +696,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         <!-- 1. Categorías de Gastos / Egresos de la Tienda -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b border-slate-100 pb-2">
             <h4 class="font-black text-sm text-rose-800 flex items-center gap-1.5">
               <span>🛍️</span><span>Egresos / Gastos Boutique</span>
@@ -702,7 +707,7 @@
         </div>
 
         <!-- 2. Categorías de Ingresos de la Tienda -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b border-slate-100 pb-2">
             <h4 class="font-black text-sm text-emerald-800 flex items-center gap-1.5">
               <span>💵</span><span>Ingresos Boutique</span>
@@ -713,7 +718,7 @@
         </div>
 
         <!-- 3. Categorías de Gastos Personales -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b border-slate-100 pb-2">
             <h4 class="font-black text-sm text-blue-800 flex items-center gap-1.5">
               <span>🏠</span><span>Egresos / Gastos Personales</span>
@@ -724,7 +729,7 @@
         </div>
 
         <!-- 4. Categorías de Ingresos Personales -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b border-slate-100 pb-2">
             <h4 class="font-black text-sm text-cyan-800 flex items-center gap-1.5">
               <span>💼</span><span>Ingresos Personales</span>
@@ -742,7 +747,7 @@
     <!-- ============================================================== -->
     <section id="tabInvoice" class="tab-content hidden space-y-6">
 
-      <div class="no-print bg-slate-900 text-white p-5 rounded-3xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="no-print bg-slate-900 text-white p-4 sm:p-5 rounded-3xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span class="text-[10px] uppercase font-bold tracking-wider text-purple-300">Comprobante Oficial RIDE SRI</span>
           <h2 class="text-xl sm:text-2xl font-black">Factura SRI Ecuador</h2>
@@ -750,30 +755,30 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <button onclick="openModalInvoiceEditor()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3.5 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
+          <button onclick="openModalInvoiceEditor()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
             <i data-lucide="edit" class="w-3.5 h-3.5"></i>
             <span>Editar Datos Emisor</span>
           </button>
-          <button onclick="openModalInvoiceClientEditor()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3.5 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
+          <button onclick="openModalInvoiceClientEditor()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
             <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
             <span>Editar Cliente</span>
           </button>
-          <button onclick="openModalInvoiceAddItem()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3.5 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
+          <button onclick="openModalInvoiceAddItem()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
             <span>+ Agregar Prenda</span>
           </button>
-          <button onclick="nextInvoiceNumber()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-2xl text-xs border border-slate-700 transition" title="Avanzar secuencial">
-            <span>Siguiente Secuencial ➔</span>
+          <button onclick="nextInvoiceNumber()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs border border-slate-700 transition" title="Avanzar secuencial">
+            <span>Secuencial ➔</span>
           </button>
-          <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2 rounded-2xl text-xs shadow flex items-center gap-1.5 transition">
-            <i data-lucide="printer" class="w-4 h-4"></i>
+          <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3.5 py-1.5 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
             <span>Imprimir / PDF</span>
           </button>
         </div>
       </div>
 
       <!-- Documento RIDE Factura SRI -->
-      <div id="printableInvoiceArea" class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-300 shadow-lg text-slate-900 max-w-4xl mx-auto space-y-6">
+      <div id="printableInvoiceArea" class="bg-white p-5 sm:p-10 rounded-3xl border border-slate-300 shadow-lg text-slate-900 max-w-4xl mx-auto space-y-6">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-slate-300">
           <!-- Emisor -->
@@ -891,31 +896,31 @@
 
   </main>
 
-  <!-- Barra Móvil Fija -->
+  <!-- Barra Móvil Fija Adaptada a Todas las Pantallas -->
   <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-1 py-1.5 shadow-2xl no-print flex items-center justify-around text-[10px] font-bold">
-    <button onclick="switchMainTab('tabDashboard')" id="mobTabDashboard" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-purple-400">
-      <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-      <span>Dashboard</span>
+    <button onclick="switchMainTab('tabDashboard')" id="mobTabDashboard" class="mob-tab-btn flex-1 min-w-0 flex flex-col items-center gap-0.5 px-1 py-1 rounded-xl text-purple-400">
+      <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+      <span class="truncate">Dashboard</span>
     </button>
-    <button onclick="switchMainTab('tabPersonal')" id="mobTabPersonal" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400">
-      <i data-lucide="wallet" class="w-4 h-4"></i>
-      <span>Personal</span>
+    <button onclick="switchMainTab('tabPersonal')" id="mobTabPersonal" class="mob-tab-btn flex-1 min-w-0 flex flex-col items-center gap-0.5 px-1 py-1 rounded-xl text-slate-400">
+      <i data-lucide="wallet" class="w-4 h-4 shrink-0"></i>
+      <span class="truncate">Personal</span>
     </button>
-    <button onclick="switchMainTab('tabBusiness')" id="mobTabBusiness" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400">
-      <i data-lucide="shirt" class="w-4 h-4"></i>
-      <span id="mobBusinessNameText">Boutique</span>
+    <button onclick="switchMainTab('tabBusiness')" id="mobTabBusiness" class="mob-tab-btn flex-1 min-w-0 flex flex-col items-center gap-0.5 px-1 py-1 rounded-xl text-slate-400">
+      <i data-lucide="shirt" class="w-4 h-4 shrink-0"></i>
+      <span id="mobBusinessNameText" class="truncate">Boutique</span>
     </button>
-    <button onclick="switchMainTab('tabDebtsControl')" id="mobTabDebtsControl" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400">
-      <i data-lucide="credit-card" class="w-4 h-4"></i>
-      <span>Deudas</span>
+    <button onclick="switchMainTab('tabDebtsControl')" id="mobTabDebtsControl" class="mob-tab-btn flex-1 min-w-0 flex flex-col items-center gap-0.5 px-1 py-1 rounded-xl text-slate-400">
+      <i data-lucide="credit-card" class="w-4 h-4 shrink-0"></i>
+      <span class="truncate">Deudas</span>
     </button>
-    <button onclick="switchMainTab('tabCategories')" id="mobTabCategories" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400">
-      <i data-lucide="tags" class="w-4 h-4"></i>
-      <span>Categorías</span>
+    <button onclick="switchMainTab('tabCategories')" id="mobTabCategories" class="mob-tab-btn flex-1 min-w-0 flex flex-col items-center gap-0.5 px-1 py-1 rounded-xl text-slate-400">
+      <i data-lucide="tags" class="w-4 h-4 shrink-0"></i>
+      <span class="truncate">Categorías</span>
     </button>
-    <button onclick="switchMainTab('tabInvoice')" id="mobTabInvoice" class="mob-tab-btn flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl text-slate-400">
-      <i data-lucide="file-check-2" class="w-4 h-4"></i>
-      <span>Factura</span>
+    <button onclick="switchMainTab('tabInvoice')" id="mobTabInvoice" class="mob-tab-btn flex-1 min-w-0 flex flex-col items-center gap-0.5 px-1 py-1 rounded-xl text-slate-400">
+      <i data-lucide="file-check-2" class="w-4 h-4 shrink-0"></i>
+      <span class="truncate">Factura</span>
     </button>
   </nav>
 
@@ -953,6 +958,10 @@
       </div>
     </div>
   </footer>
+
+  <!-- ============================================================== -->
+  <!-- MODALES DE OPERACIONES Y GESTIÓN                               -->
+  <!-- ============================================================== -->
 
   <!-- MODAL: NUEVA PRENDA (SIN TALLAS NI COLORES, SOLO GÉNERO) -->
   <div id="modalNewProduct" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
@@ -1356,7 +1365,7 @@
     <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 border border-slate-200 text-xs max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
         <h3 class="font-black text-slate-900 text-sm">Editar Datos Emisor Factura SRI</h3>
-        <button onclick="closeModal('modalInvoiceEditor')" class="text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <button onclick="closeModal('modalInvoiceEditor')" class="text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <form onsubmit="saveInvoiceIssuerData(event)" class="space-y-2.5">
         <div><label class="block font-bold text-slate-700">RUC Emisor</label><input type="text" id="editInvRuc" required class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-mono font-bold"></div>
@@ -1468,7 +1477,7 @@
         <div class="pt-3 border-t border-slate-100 space-y-2">
           <span class="font-black text-slate-800 block">Copias de Seguridad (Privadas en tu Móvil)</span>
           <div class="grid grid-cols-2 gap-2">
-            <button onclick="shareBackupDataWhatsApp()" class="p-2.5 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center gap-1.5 shadow">
+            <button onclick="shareBackupDataWhatsApp()" class="p-2.5 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center gap-1.5 shadow active:scale-95 transition">
               <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
               <span>WhatsApp (.json)</span>
             </button>
@@ -1531,7 +1540,7 @@
           <i data-lucide="alert-triangle" class="w-4 h-4"></i>
           <span>Confirmar Borrado Total</span>
         </h4>
-        <button onclick="closeModal('modalSecurityReset')" class="text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <button onclick="closeModal('modalSecurityReset')" class="text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <p class="text-slate-600">Ingresa tu contraseña personal o la clave maestra de rescate:</p>
       <input type="password" id="inputResetPassword" placeholder="Contraseña de seguridad..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-sm text-center">
@@ -1690,7 +1699,6 @@
     }
 
     function calculateFinances() {
-      // Filtros de fecha del Dashboard General
       const dYear = document.getElementById('dashYearFilter')?.value || 'all';
       const dMonth = document.getElementById('dashMonthFilter')?.value || 'all';
 
@@ -2229,7 +2237,7 @@
           <td class="py-2.5 px-2 text-slate-600">${t.detail}</td>
           <td class="py-2.5 px-2 text-right font-mono font-bold ${itemColor(t.type)}">${t.type === 'ingreso' ? '+' : '-'}$${Number(t.amount).toFixed(2)}</td>
           <td class="py-2.5 px-2 text-right">
-            <button onclick="deletePersonalTransaction('${t.id}')" class="text-slate-300 hover:text-rose-600"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+            <button onclick="deletePersonalTransaction('${t.id}')" class="text-slate-300 hover:text-rose-600 p-1"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -2342,6 +2350,7 @@
         `;
         container.appendChild(card);
       });
+      lucide.createIcons();
     }
 
     function openModalDebtPayment(debtId) {
@@ -2736,7 +2745,9 @@
       }
     }
 
+    // BOTÓN: "Presiona aquí para hacer respaldo" - DESCARGA JSON Y ABRE WHATSAPP
     function shareBackupDataWhatsApp() {
+      // 1. Descarga automática del archivo JSON real
       const dataString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
       const filename = `Respaldo_${appState.settings.storeName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
 
@@ -2747,8 +2758,9 @@
       a.click();
       a.remove();
 
+      // 2. Apertura simultánea de WhatsApp con el resumen contable completo
       const f = calculateFinances();
-      const summary = `*RESPALDO ${appState.settings.storeName}*\nFecha: ${new Date().toLocaleDateString()}\nPropietario: ${appState.settings.ownerName}\nCaja Boutique: $${f.boutiqueFinalBalance.toFixed(2)}\nSaldo Personal: $${f.personalFinalBalance.toFixed(2)}\nIngresos Extras: $${f.consolidatedExtraIncome.toFixed(2)}\nDinero Recuperado (Reinvertir): $${f.totalRecoveredCapital.toFixed(2)}\nPrendas en Stock: ${f.totalUnitsStock.toLocaleString()}\nUbicación: Tupigachi - Ecuador 🇪🇨\n(Archivo .json descargado en tu dispositivo para respaldo seguro)`;
+      const summary = `*RESPALDO ${appState.settings.storeName}*\nFecha: ${new Date().toLocaleDateString()}\nPropietario: ${appState.settings.ownerName}\nCaja Boutique: $${f.boutiqueFinalBalance.toFixed(2)}\nSaldo Personal: $${f.personalFinalBalance.toFixed(2)}\nIngresos Extras: $${f.consolidatedExtraIncome.toFixed(2)}\nDinero Recuperado (Reinvertir): $${f.totalRecoveredCapital.toFixed(2)}\nPrendas en Stock: ${f.totalUnitsStock.toLocaleString()}\nUbicación: Tupigachi - Ecuador 🇪🇨\n(Archivo .json descargado automáticamente en tu dispositivo para respaldo seguro)`;
 
       window.open(`https://wa.me/593963923399?text=${encodeURIComponent(summary)}`, '_blank');
       showToast("Archivo JSON descargado y WhatsApp abierto", "📲");
@@ -2863,7 +2875,7 @@
         b.classList.add('text-slate-400');
       });
       document.querySelectorAll('.mob-tab-btn').forEach(b => {
-        b.classList.remove('text-purple-400', 'bg-slate-800/80');
+        b.classList.remove('text-purple-400');
         b.classList.add('text-slate-400');
       });
 
@@ -2879,7 +2891,7 @@
       const activeMobBtn = document.getElementById('mob' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
       if (activeMobBtn) {
         activeMobBtn.classList.remove('text-slate-400');
-        activeMobBtn.classList.add('text-purple-400', 'bg-slate-800/80');
+        activeMobBtn.classList.add('text-purple-400');
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
